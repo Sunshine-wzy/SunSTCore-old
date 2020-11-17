@@ -1,0 +1,9 @@
+# qqId为机器人QQ号, passWord为QQ密码
+qqId: 
+passWord: 
+
+# 反馈接受QQ号
+receiverId: 
+
+# 每小时反馈保存上限 (默认: 10 | 0为无限制)
+reportSaveUpperLimit: 10

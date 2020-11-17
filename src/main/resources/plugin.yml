@@ -1,0 +1,5 @@
+name: SunSTCore
+version: 1.0.0
+main: io.github.sunshinewzy.sunstcore.SunSTCore
+author: Sunshine_wzy
+description: A core lib by SunST.
