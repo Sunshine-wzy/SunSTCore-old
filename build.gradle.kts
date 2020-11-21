@@ -50,3 +50,11 @@ dependencies {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+tasks {
+    jar {
+        archiveBaseName.set("SunSTCore")
+        archiveVersion.set(project.version.toString())
+        destinationDirectory.set(file("F:/Kotlin/Workspace/SkyDream/cores"))
+    }
+}
