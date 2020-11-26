@@ -6,7 +6,7 @@ class SunSTCore : JavaPlugin() {
     
     override fun onEnable() {
         
-        logger.info("SunSTCore ╪стьЁи╧╕ё║")
+        logger.info("SunSTCore Е┼═Х╫╫Ф┬░Е┼÷О╪│")
         
     }
 

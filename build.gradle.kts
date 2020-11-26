@@ -57,4 +57,10 @@ tasks {
         archiveVersion.set(project.version.toString())
         destinationDirectory.set(file("F:/Kotlin/Workspace/SkyDream/cores"))
     }
+    
+    shadowJar {
+        archiveBaseName.set("SunSTCore")
+        archiveVersion.set(project.version.toString())
+        destinationDirectory.set(file("F:/Kotlin/Workspace/SkyDream/cores"))
+    }
 }
