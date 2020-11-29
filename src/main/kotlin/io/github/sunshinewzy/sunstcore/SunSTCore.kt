@@ -1,18 +1,25 @@
 package io.github.sunshinewzy.sunstcore
 
 import io.github.sunshinewzy.sunstcore.listeners.PlayerListener
-import io.github.sunshinewzy.sunstcore.modules.task.ItemTask
-import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
-import io.github.sunshinewzy.sunstcore.objects.orderWith
 import org.bukkit.Bukkit
+import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.java.JavaPlugin
 
 class SunSTCore : JavaPlugin() {
     
-    val pluginManager = Bukkit.getServer().pluginManager
+    companion object {
+        private var pluginSunSTCore: JavaPlugin? = null
+        
+        fun getPlugin(): JavaPlugin {
+            return pluginSunSTCore!!
+        }
+    }
+    
+    val pluginManager: PluginManager = Bukkit.getServer().pluginManager
     
     
     override fun onEnable() {
+        pluginSunSTCore = getPlugin()
         
         logger.info("SunSTCore 加载成功！")
         
