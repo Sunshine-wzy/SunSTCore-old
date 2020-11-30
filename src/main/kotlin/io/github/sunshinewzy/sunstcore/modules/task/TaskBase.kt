@@ -36,4 +36,5 @@ abstract class TaskBase(
         p.openInventory(inventory)
     }
     
+    
 }
