@@ -20,3 +20,15 @@ fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
         setItem(i + 8, edgeItem)
     }
 }
+
+// Object转Map
+fun <K, V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>): MutableMap<K, V>? {
+    val result = HashMap<K, V>()
+    if (this is Map<*, *>) {
+        for ((key, value) in this) {
+            result[kClazz.cast(key)] = vClazz.cast(value)
+        }
+        return result
+    }
+    return null
+}

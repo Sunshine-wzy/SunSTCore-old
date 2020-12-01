@@ -8,14 +8,14 @@ object SEventSubscribe {
     
     private val subscribes = HashMap<Class<out Event>, ArrayList<() -> Unit>>()
     
-    fun <T: Event> subscribeEvent(eventClazz: Class<out T>, runCode: () -> Unit) {
+    fun <T : Event> subscribeEvent(eventClazz: Class<out T>, runCode: () -> Unit) {
         val list = subscribes[eventClazz]
         if(list == null)
             subscribes[eventClazz] = ArrayList()
         else list.add(runCode)
     }
     
-    fun <T: Event> callSubscribeEvent(event: T) {
+    fun <T : Event> callSubscribeEvent(event: T) {
         val list = subscribes[event.javaClass]
         list?.forEach {
             run(it)

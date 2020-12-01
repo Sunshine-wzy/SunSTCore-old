@@ -29,9 +29,10 @@ abstract class SAutoSaveData(
         }, saveTime, saveTime)
     }
     
+
     abstract fun modifyConfig(config: YamlConfiguration)
     
-    abstract fun deserialize(config: YamlConfiguration)
+    abstract fun loadConfig(config: YamlConfiguration)
     
     
     fun save(config: YamlConfiguration) {
@@ -47,7 +48,7 @@ abstract class SAutoSaveData(
     }
     
     fun load(config: YamlConfiguration) {
-        
+        loadConfig(config)
     }
     
     fun getConfig(): YamlConfiguration {
