@@ -1,6 +1,7 @@
 package io.github.sunshinewzy.sunstcore
 
 import io.github.sunshinewzy.sunstcore.listeners.PlayerListener
+import io.github.sunshinewzy.sunstcore.modules.data.DataManager
 import org.bukkit.Bukkit
 import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.java.JavaPlugin
@@ -23,9 +24,8 @@ class SunSTCore : JavaPlugin() {
         
         logger.info("SunSTCore 加载成功！")
         
-        
+        DataManager.init()
         registerListeners()
-        
         
         
     }

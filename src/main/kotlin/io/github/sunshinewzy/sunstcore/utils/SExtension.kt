@@ -32,3 +32,19 @@ fun <K, V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>): MutableMap<K, V>? {
     }
     return null
 }
+
+fun <K, V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>, targetMap: MutableMap<K, V>): Boolean {
+    if (this is Map<*, *>) {
+        for ((key, value) in this) {
+            targetMap[kClazz.cast(key)] = vClazz.cast(value)
+        }
+        return true
+    }
+    return false
+}
+
+inline fun <reified K, reified V> Any.castMap(targetMap: MutableMap<K, V>): Boolean {
+    if(castMap(K::class.java, V::class.java, targetMap))
+        return true
+    return false
+}

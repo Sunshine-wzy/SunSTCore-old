@@ -15,7 +15,7 @@ class SPlayerData(
     
     val taskProgress = HashMap<String, MutableMap<String, MutableMap<String, Boolean>>>()
     
-    
+    constructor(uuid: String, path: String = "", saveTime: Long = 600_000): this(UUID.fromString(uuid), path, saveTime)
     constructor(player: Player, path: String = "", saveTime: Long = 600_000): this(player.uniqueId, path, saveTime)
     
     

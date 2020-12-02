@@ -13,7 +13,7 @@ abstract class SAutoSaveData(
 ) {
     private val file = File(
         SunSTCore.getPlugin().dataFolder,
-        if (path == "") "$name.yml"
+        if (path == "") "data/$name.yml"
         else "${path.replace("\\", "/")}/$name.yml"
     )
     

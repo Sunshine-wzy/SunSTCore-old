@@ -16,6 +16,8 @@ object PlayerListener : Listener {
     @EventHandler
     fun onPlayerJoin(e: PlayerJoinEvent) {
         SEventSubscribe.callSubscribeEvent(e)
+        
+        
     }
     
     
