@@ -2,8 +2,6 @@ package io.github.sunshinewzy.sunstcore.modules.data
 
 import io.github.sunshinewzy.sunstcore.SunSTCore
 import java.io.File
-import java.util.*
-import kotlin.collections.HashMap
 
 object DataManager {
     val sPlayerData = HashMap<String, SPlayerData>()

@@ -38,21 +38,4 @@ class SPlayerData(
         }
     }
 
-
-    fun Player.hasCompleteTask(task: TaskBase): Boolean {
-        val projectName = task.taskStage.taskProject.projectName
-        if(!taskProgress.containsKey(projectName))
-            return false
-
-        val projects = taskProgress[projectName] ?: return false
-        val stageName = task.taskStage.stageName
-        if(!projects.containsKey(stageName))
-            return false
-
-        val stages = projects[stageName] ?: return false
-        if(!stages.containsKey(task.taskName))
-            return false
-
-        return stages[task.taskName] ?: return false
-    }
 }

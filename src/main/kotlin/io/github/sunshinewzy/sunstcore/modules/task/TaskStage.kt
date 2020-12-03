@@ -2,8 +2,10 @@ package io.github.sunshinewzy.sunstcore.modules.task
 
 import io.github.sunshinewzy.sunstcore.objects.SInventoryHolder
 import io.github.sunshinewzy.sunstcore.utils.createEdge
+import io.github.sunshinewzy.sunstcore.utils.hasCompleteTask
 import org.bukkit.Bukkit
 import org.bukkit.Sound
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 class TaskStage(
@@ -19,21 +21,22 @@ class TaskStage(
     private val holder = SInventoryHolder(
         Pair(taskProject.projectName, stageName)
     )
-    private val inventory = Bukkit.createInventory(holder, invSize, stageName)
-    
     
     init {
         taskProject.stageMap[stageName] = this
         
-        updateInventory()
     }
     
     
-    private fun updateInventory() {
-        inventory.clear()
-        inventory.createEdge(invSize, edgeItem)
+    private fun openInventory(p: Player) {
+        val inv = Bukkit.createInventory(holder, invSize, stageName)
+        inv.createEdge(invSize, edgeItem)
         tasks.forEach { 
-            inventory.setItem(it.order, it.symbol)
+            val pre = it.predecessor
+            if(pre == null || p.hasCompleteTask(pre)){
+                inv.setItem(it.order, it.symbol)
+            }
+            
         }
     }
     
