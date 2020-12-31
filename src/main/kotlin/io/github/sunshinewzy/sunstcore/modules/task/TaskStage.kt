@@ -6,6 +6,7 @@ import io.github.sunshinewzy.sunstcore.utils.hasCompleteTask
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 class TaskStage(
@@ -28,8 +29,8 @@ class TaskStage(
     }
     
     
-    private fun openInventory(p: Player) {
-        val inv = Bukkit.createInventory(holder, invSize, stageName)
+    private fun getTaskInv(p: Player): Inventory {
+        val inv = Bukkit.createInventory(holder, invSize * 9, stageName)
         inv.createEdge(invSize, edgeItem)
         tasks.forEach { 
             val pre = it.predecessor
@@ -38,6 +39,8 @@ class TaskStage(
             }
             
         }
+        
+        return inv
     }
     
 }

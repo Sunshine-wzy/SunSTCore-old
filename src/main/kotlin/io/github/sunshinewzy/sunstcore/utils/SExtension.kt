@@ -3,12 +3,17 @@ package io.github.sunshinewzy.sunstcore.utils
 import io.github.sunshinewzy.sunstcore.modules.data.DataManager
 import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import org.bukkit.Bukkit
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 
-//快速创建 5*9 边框
+//region 快速创建边框
+
+/**
+ * 快速创建 5*9 边框
+ */
 fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
     val meta = if (edgeItem.hasItemMeta()) edgeItem.itemMeta else Bukkit.getItemFactory().getItemMeta(edgeItem.type)
     meta.displayName = "§f边框"
@@ -24,7 +29,13 @@ fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
     }
 }
 
-// Object转Map
+//endregion
+
+//region 对象转化
+
+/**
+ * Object转Map
+ */
 fun <K, V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>): MutableMap<K, V>? {
     val result = HashMap<K, V>()
     if (this is Map<*, *>) {
@@ -52,6 +63,10 @@ inline fun <reified K, reified V> Any.castMap(targetMap: MutableMap<K, V>): Bool
     return false
 }
 
+//endregion
+
+//region 任务模块
+
 fun Player.hasCompleteTask(task: TaskBase): Boolean {
     val uid = uniqueId.toString()
     val progress = (if(DataManager.sPlayerData.containsKey(uid)) DataManager.sPlayerData[uid] else return false) ?: return false
@@ -71,3 +86,14 @@ fun Player.hasCompleteTask(task: TaskBase): Boolean {
 
     return stages[task.taskName] ?: return false
 }
+
+//endregion
+
+//region 玩家 Player
+
+fun Player.openInvWithSound(inv: Inventory, openSound: Sound, volume: Float, pitch: Float) {
+    world.playSound(location, openSound, volume, pitch)
+    openInventory(inv)
+}
+
+//endregion

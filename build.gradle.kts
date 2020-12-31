@@ -44,6 +44,7 @@ dependencies {
     implementation("net.mamoe:mirai-core-qqandroid:1.3.0")
     compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
 
+    compileOnly(fileTree(mapOf("dir" to "cores", "include" to listOf("*.jar"))))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 

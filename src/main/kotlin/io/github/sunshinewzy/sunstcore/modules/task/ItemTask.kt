@@ -18,8 +18,8 @@ class ItemTask(
     pitch: Float = taskStage.pitch,
 ) : TaskBase(taskStage, taskName, order, predecessor, symbol, reward, openSound, volume, pitch, 5) {
     init {
-        inventory.setItem(2 orderWith 3, descriptionItem)
-        inventory.setItem(5 orderWith 3, requireItem)
+        setSlotItem(2, 3, descriptionItem)
+        setSlotItem(5, 3, requireItem)
         
     }
 }
