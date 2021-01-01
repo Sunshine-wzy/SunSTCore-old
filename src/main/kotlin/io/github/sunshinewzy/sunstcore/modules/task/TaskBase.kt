@@ -5,6 +5,7 @@ import io.github.sunshinewzy.sunstcore.objects.orderWith
 import io.github.sunshinewzy.sunstcore.utils.createEdge
 import org.bukkit.Bukkit
 import org.bukkit.Sound
+import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -20,7 +21,7 @@ abstract class TaskBase(
     var volume: Float = taskStage.volume,
     var pitch: Float = taskStage.pitch,
     var invSize: Int = 5
-) {
+): ConfigurationSerializable {
     private val holder = SInventoryHolder(
         Triple(taskStage.taskProject.projectName, taskStage.stageName, taskName)
     )
@@ -31,6 +32,25 @@ abstract class TaskBase(
         taskStage.tasks.add(this)
         
         
+    }
+    
+    
+    override fun serialize(): MutableMap<String, Any> {
+        val map = HashMap<String, Any>()
+
+        map["taskStage"] = taskStage.stageName
+        map["taskName"] = taskName
+        map["order"] = order
+        map["predecessor"] = if(predecessor != null) predecessor!!.taskName else "null"
+        map["symbol"] = symbol
+        map["reward"] = reward
+        map["openSound"] = openSound
+        map["volume"] = volume
+        map["pitch"] = pitch
+        map["invSize"] = invSize
+        map["slotItems"] = slotItems
+        
+        return map
     }
     
     
@@ -58,4 +78,5 @@ abstract class TaskBase(
     }
     
     fun setSlotItem(x: Int, y: Int, item: ItemStack): Boolean = setSlotItem(x orderWith y, item)
+    
 }

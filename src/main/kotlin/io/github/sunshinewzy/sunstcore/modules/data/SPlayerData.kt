@@ -1,6 +1,5 @@
 package io.github.sunshinewzy.sunstcore.modules.data
 
-import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.utils.castMap
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
@@ -9,7 +8,7 @@ import kotlin.collections.HashMap
 
 class SPlayerData(
     val uuid: UUID,
-    path: String = "",
+    path: String = "SPlayer",
     saveTime: Long = 600_000,
 ) : SAutoSaveData(uuid.toString(), path, saveTime) {
     
