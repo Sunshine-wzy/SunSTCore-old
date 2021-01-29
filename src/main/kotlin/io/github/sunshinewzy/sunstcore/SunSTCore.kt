@@ -1,7 +1,8 @@
 package io.github.sunshinewzy.sunstcore
 
-import io.github.sunshinewzy.sunstcore.listeners.PlayerListener
+import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener
 import io.github.sunshinewzy.sunstcore.modules.data.DataManager
+import io.github.sunshinewzy.sunstcore.utils.SEventSubscribe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.Bukkit
@@ -24,12 +25,13 @@ class SunSTCore : JavaPlugin() {
     
     override fun onEnable() {
         pluginSunSTCore = this
-        
-        logger.info("SunSTCore 加载成功！")
-        
+
         DataManager.init()
         registerListeners()
         
+        logger.info("SunSTCore 加载成功！")
+        
+        SEventSubscribe.test()
     }
 
     override fun onDisable() {
@@ -38,7 +40,7 @@ class SunSTCore : JavaPlugin() {
     
     
     private fun registerListeners() {
-        pluginManager.registerEvents(PlayerListener, this)
+        pluginManager.registerEvents(SEventSubscriberListener, this)
     }
     
 }
