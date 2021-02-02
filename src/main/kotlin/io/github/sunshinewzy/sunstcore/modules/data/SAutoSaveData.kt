@@ -1,41 +1,61 @@
 package io.github.sunshinewzy.sunstcore.modules.data
 
 import io.github.sunshinewzy.sunstcore.SunSTCore
+import io.github.sunshinewzy.sunstcore.utils.getDataPath
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.io.IOException
 
+/**
+ * @param plugin 插件实例
+ * @param name 保存的文件名
+ * @param path 保存的路径(保存到 plugins/插件名/路径 下)
+ * @param saveTime 自动保存时间间隔
+ */
 abstract class SAutoSaveData(
+    val plugin: JavaPlugin,
     val name: String,
     val path: String = "",
-    var saveTime: Long = 600_000
+    val saveTime: Long = 600_000
 ) {
     private val file = File(
-        SunSTCore.getPlugin().dataFolder,
+        plugin.dataFolder,
         if (path == "") "data/$name.yml"
         else "${path.replace("\\", "/")}/$name.yml"
     )
     
     val dataMap = HashMap<String, Any>()
     
+    
+    constructor(plugin: JavaPlugin, name: String, file: File): this(
+        plugin,
+        name,
+        file.getDataPath(plugin)
+    )
+    
     init {
-        load(getConfig())
-        
         Bukkit.getScheduler().runTaskTimer(SunSTCore.getPlugin(), {
-            val config = getConfig()
-            modifyConfig(config)
-            save(config)
+            save()
         }, saveTime, saveTime)
     }
-    
 
-    abstract fun modifyConfig(config: YamlConfiguration)
+    /**
+     * 保存文件前调用
+     */
+    abstract fun YamlConfiguration.modifyConfig()
+
+    /**
+     * 加载文件后调用
+     */
+    abstract fun YamlConfiguration.loadConfig()
     
-    abstract fun loadConfig(config: YamlConfiguration)
     
-    
-    fun save(config: YamlConfiguration) {
+    fun save() {
+        val config = getConfig()
+        config.modifyConfig()
+        
         dataMap.forEach { (key, value) ->
             config.set(key, value)
         }
@@ -46,12 +66,17 @@ abstract class SAutoSaveData(
             ex.printStackTrace()
         }
     }
-    
-    fun load(config: YamlConfiguration) {
-        loadConfig(config)
+
+    /**
+     * 加载配置文件
+     * 实例化类后请主动调用
+     */
+    fun load() {
+        getConfig().loadConfig()
     }
     
-    fun getConfig(): YamlConfiguration {
+    
+    private fun getConfig(): YamlConfiguration {
         return YamlConfiguration.loadConfiguration(file)
     }
 }

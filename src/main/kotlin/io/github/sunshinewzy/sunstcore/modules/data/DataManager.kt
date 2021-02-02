@@ -1,23 +1,51 @@
 package io.github.sunshinewzy.sunstcore.modules.data
 
 import io.github.sunshinewzy.sunstcore.SunSTCore
+import io.github.sunshinewzy.sunstcore.interfaces.Initable
+import io.github.sunshinewzy.sunstcore.modules.data.sunst.SunSTPlayerData
+import io.github.sunshinewzy.sunstcore.utils.giveItem
+import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
+import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
 import java.io.File
 
-object DataManager {
+object DataManager : Initable {
     private val dir = SunSTCore.getPlugin().dataFolder
     private val dataDir = File(dir, "data")
     
-    val sPlayerData = HashMap<String, SPlayerData>()
+    val sPlayerData = HashMap<String, SunSTPlayerData>()
     val sTaskData = HashMap<String, STaskData>()
     
+    val firstJoinGiveOpenItems = HashMap<String, ItemStack>()
     
-    fun init() {
+    
+    override fun init() {
         loadFolderData("SPlayer"){
             file, fileName ->
-            sPlayerData[fileName] = SPlayerData(fileName)
+            SunSTPlayerData(SunSTCore.getPlugin(), fileName, file)
+        }
+        
+        subscribeEvent<PlayerJoinEvent> { 
+            val uid = player.uniqueId.toString()
+            
+            val data = player.getSunSTData()
+            val isFirstJoinGive = data.isFirstJoinGive
+            firstJoinGiveOpenItems.forEach { (projectName, openItem) -> 
+                if(!isFirstJoinGive.containsKey(projectName) || isFirstJoinGive[projectName] != true){
+                    player.giveItem(openItem)
+                    isFirstJoinGive[projectName] = true
+                }
+            }
         }
     }
     
+    fun saveData() {
+        sPlayerData.values.forEach { 
+            it.save()
+        }
+    }
     
     private fun loadFolderData(
         folderName: String,
@@ -40,6 +68,38 @@ object DataManager {
 //                loadFolderData()
 //            }
         }
+    }
+    
+    
+    fun Player.getSunSTData(): SunSTPlayerData {
+        val uid = uniqueId.toString()
+        
+        if(sPlayerData.containsKey(uid))
+            return sPlayerData[uid]!!
+        
+        val data = SunSTPlayerData(SunSTCore.getPlugin(), uid)
+        data.load()
+        sPlayerData[uid] = data
+        return data
+    }
+    
+    inline fun <reified V> YamlConfiguration.getMap(
+        key: String,
+        map: MutableMap<String, V>
+    ): Boolean {
+        if(!contains(key))
+            return false
+        
+        val root = getConfigurationSection(key) ?: return false
+        val keys = root.getKeys(false)
+        keys.forEach { 
+            val value = root.get(it) ?: return@forEach
+            if(value is V){
+                map[it] = value
+            }
+        }
+
+        return true
     }
     
 }

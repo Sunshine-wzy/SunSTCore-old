@@ -1,16 +1,20 @@
 package io.github.sunshinewzy.sunstcore.modules.data
 
+import io.github.sunshinewzy.sunstcore.SunSTCore
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
 import org.bukkit.configuration.file.YamlConfiguration
 
-class STaskData(val taskProject: TaskProject) : SAutoSaveData(taskProject.projectName) {
+/**
+ * 自定义任务数据保存
+ */
+class STaskData(val taskProject: TaskProject) : SAutoSaveData(SunSTCore.getPlugin(), taskProject.projectName, "TaskData") {
     
     
-    override fun modifyConfig(config: YamlConfiguration) {
+    override fun YamlConfiguration.modifyConfig() {
         
     }
 
-    override fun loadConfig(config: YamlConfiguration) {
+    override fun YamlConfiguration.loadConfig() {
         
     }
     

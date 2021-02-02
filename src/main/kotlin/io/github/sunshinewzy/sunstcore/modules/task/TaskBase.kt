@@ -1,8 +1,10 @@
 package io.github.sunshinewzy.sunstcore.modules.task
 
-import io.github.sunshinewzy.sunstcore.objects.SInventoryHolder
+import io.github.sunshinewzy.sunstcore.objects.inventoryholder.SProtectInventoryHolder
+import io.github.sunshinewzy.sunstcore.objects.item.TaskGuideItem
 import io.github.sunshinewzy.sunstcore.objects.orderWith
 import io.github.sunshinewzy.sunstcore.utils.createEdge
+import io.github.sunshinewzy.sunstcore.utils.sendMsg
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.configuration.serialization.ConfigurationSerializable
@@ -12,7 +14,7 @@ import org.bukkit.inventory.ItemStack
 
 abstract class TaskBase(
     val taskStage: TaskStage,
-    var taskName: String,
+    val taskName: String,
     var order: Int,
     var predecessor: TaskBase?,
     var symbol: ItemStack,
@@ -21,15 +23,15 @@ abstract class TaskBase(
     var volume: Float = taskStage.volume,
     var pitch: Float = taskStage.pitch,
     var invSize: Int = 5
-): ConfigurationSerializable {
-    private val holder = SInventoryHolder(
+): ConfigurationSerializable, TaskInventory {
+    protected val holder = SProtectInventoryHolder(
         Triple(taskStage.taskProject.projectName, taskStage.stageName, taskName)
     )
     
     private val slotItems = HashMap<Int, ItemStack>()
     
     init {
-        taskStage.tasks.add(this)
+        taskStage.taskMap[taskName] = this
         
         
     }
@@ -54,12 +56,12 @@ abstract class TaskBase(
     }
     
     
-    fun openInventory(p: Player) {
+    override fun openTaskInv(p: Player) {
         p.world.playSound(p.location, openSound, volume, pitch)
-        p.openInventory(getTaskInv())
+        p.openInventory(getTaskInv(p))
     }
     
-    fun getTaskInv(): Inventory {
+    override fun getTaskInv(p: Player): Inventory {
         val inv = Bukkit.createInventory(holder, invSize * 9, taskName)
         inv.createEdge(invSize, taskStage.edgeItem)
         
@@ -78,5 +80,18 @@ abstract class TaskBase(
     }
     
     fun setSlotItem(x: Int, y: Int, item: ItemStack): Boolean = setSlotItem(x orderWith y, item)
+
+    fun setSlotItem(x: Int, y: Int, item: TaskGuideItem): Boolean = setSlotItem(x orderWith y, item.item)
+
+    fun hasPredecessor(): Boolean = predecessor != null
+
+    fun againSubmitTask(player: Player) {
+        player.world.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 0.8f)
+        player.sendMsg("&c您已完成过任务 $taskName 了，不能重复提交！")
+    }
     
+    fun requireNotEnough(player: Player) {
+        player.world.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1.2f)
+        player.sendMsg("&c你的背包中没有所需物品！")
+    }
 }

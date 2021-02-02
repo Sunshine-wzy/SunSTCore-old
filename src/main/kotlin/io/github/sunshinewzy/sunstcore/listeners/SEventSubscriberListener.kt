@@ -1,6 +1,6 @@
 package io.github.sunshinewzy.sunstcore.listeners
 
-import io.github.sunshinewzy.sunstcore.utils.SEventSubscribe
+import io.github.sunshinewzy.sunstcore.utils.SEventSubscriber
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -21,10 +21,9 @@ import org.spigotmc.event.entity.EntityDismountEvent
 import org.spigotmc.event.entity.EntityMountEvent
 import org.spigotmc.event.player.PlayerSpawnLocationEvent
 
-object SEventSubscriberListener : Listener {
-    
+object SEventSubscriberListener1 : Listener {
     private fun <E: Event> call(e: E) {
-        SEventSubscribe.callSubscribeEvent(e)
+        SEventSubscriber.callSubscribeEvent(e)
     }
     
     
@@ -176,7 +175,7 @@ object SEventSubscriberListener : Listener {
 
     @EventHandler
     fun onBlockDispense(e: BlockDispenseEvent) { call(e) }
-    
+
     @EventHandler
     fun onBlockExp(e: BlockExpEvent) { call(e) }
     
@@ -238,296 +237,485 @@ object SEventSubscriberListener : Listener {
     
     //endregion
     
+}
+
+object SEventSubscriberListener2 : Listener {
+    private fun <E: Event> call(e: E) {
+        SEventSubscriber.callSubscribeEvent(e)
+    }
+
     //region EntityEvent
-    
-    @EventHandler
-    fun onAreaEffectCloudApply(e: AreaEffectCloudApplyEvent) { call(e) }
 
     @EventHandler
-    fun onCreeperPower(e: CreeperPowerEvent) { call(e) }
+    fun onAreaEffectCloudApply(e: AreaEffectCloudApplyEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEnderDragonChangePhase(e: EnderDragonChangePhaseEvent) { call(e) }
+    fun onCreeperPower(e: CreeperPowerEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityAirChange(e: EntityAirChangeEvent) { call(e) }
+    fun onEnderDragonChangePhase(e: EnderDragonChangePhaseEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityBreed(e: EntityBreedEvent) { call(e) }
+    fun onEntityAirChange(e: EntityAirChangeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityChangeBlock(e: EntityChangeBlockEvent) { call(e) }
+    fun onEntityBreed(e: EntityBreedEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityCombust(e: EntityCombustEvent) { call(e) }
+    fun onEntityChangeBlock(e: EntityChangeBlockEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityCreatePortal(e: EntityCreatePortalEvent) { call(e) }
+    fun onEntityCombust(e: EntityCombustEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityDamage(e: EntityDamageEvent) { call(e) }
+    fun onEntityCreatePortal(e: EntityCreatePortalEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityDeath(e: EntityDeathEvent) { call(e) }
+    fun onEntityDamage(e: EntityDamageEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityDismount(e: EntityDismountEvent) { call(e) }
+    fun onEntityDeath(e: EntityDeathEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityExplode(e: EntityExplodeEvent) { call(e) }
+    fun onEntityDismount(e: EntityDismountEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityInteract(e: EntityInteractEvent) { call(e) }
+    fun onEntityExplode(e: EntityExplodeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityMount(e: EntityMountEvent) { call(e) }
+    fun onEntityInteract(e: EntityInteractEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityPickupItem(e: EntityPickupItemEvent) { call(e) }
+    fun onEntityMount(e: EntityMountEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityPortalEnter(e: EntityPortalEnterEvent) { call(e) }
+    fun onEntityPickupItem(e: EntityPickupItemEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityRegainHealth(e: EntityRegainHealthEvent) { call(e) }
+    fun onEntityPortalEnter(e: EntityPortalEnterEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityResurrect(e: EntityResurrectEvent) { call(e) }
+    fun onEntityRegainHealth(e: EntityRegainHealthEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityShootBow(e: EntityShootBowEvent) { call(e) }
+    fun onEntityResurrect(e: EntityResurrectEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntitySpawn(e: EntitySpawnEvent) { call(e) }
+    fun onEntityShootBow(e: EntityShootBowEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityTame(e: EntityTameEvent) { call(e) }
+    fun onEntitySpawn(e: EntitySpawnEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityTarget(e: EntityTargetEvent) { call(e) }
+    fun onEntityTame(e: EntityTameEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityTeleport(e: EntityTeleportEvent) { call(e) }
+    fun onEntityTarget(e: EntityTargetEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityToggleGlide(e: EntityToggleGlideEvent) { call(e) }
+    fun onEntityTeleport(e: EntityTeleportEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onEntityUnleash(e: EntityUnleashEvent) { call(e) }
+    fun onEntityToggleGlide(e: EntityToggleGlideEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onExplosionPrime(e: ExplosionPrimeEvent) { call(e) }
+    fun onEntityUnleash(e: EntityUnleashEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onFireworkExplode(e: FireworkExplodeEvent) { call(e) }
+    fun onExplosionPrime(e: ExplosionPrimeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onFoodLevelChange(e: FoodLevelChangeEvent) { call(e) }
+    fun onFireworkExplode(e: FireworkExplodeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onHorseJump(e: HorseJumpEvent) { call(e) }
+    fun onFoodLevelChange(e: FoodLevelChangeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onItemDespawn(e: ItemDespawnEvent) { call(e) }
+    fun onHorseJump(e: HorseJumpEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onItemMerge(e: ItemMergeEvent) { call(e) }
+    fun onItemDespawn(e: ItemDespawnEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onProjectileHit(e: ProjectileHitEvent) { call(e) }
+    fun onItemMerge(e: ItemMergeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onSheepDyeWool(e: SheepDyeWoolEvent) { call(e) }
+    fun onProjectileHit(e: ProjectileHitEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onSheepRegrowWool(e: SheepRegrowWoolEvent) { call(e) }
+    fun onSheepDyeWool(e: SheepDyeWoolEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onSlimeSplit(e: SlimeSplitEvent) { call(e) }
+    fun onSheepRegrowWool(e: SheepRegrowWoolEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVillagerAcquireTrade(e: VillagerAcquireTradeEvent) { call(e) }
+    fun onSlimeSplit(e: SlimeSplitEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVillagerReplenishTrade(e: VillagerReplenishTradeEvent) { call(e) }
-    
+    fun onVillagerAcquireTrade(e: VillagerAcquireTradeEvent) {
+        call(e)
+    }
+
+    @EventHandler
+    fun onVillagerReplenishTrade(e: VillagerReplenishTradeEvent) {
+        call(e)
+    }
+
     /*
     @EventHandler
     fun on(e: ) { call(e) }
     */
-    
+
     //endregion
-    
+
     //region InventoryEvent
 
     @EventHandler
-    fun onEnchantItem(e: EnchantItemEvent) { call(e) }
+    fun onEnchantItem(e: EnchantItemEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onInventoryClose(e: InventoryCloseEvent) { call(e) }
+    fun onInventoryClose(e: InventoryCloseEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onInventoryInteract(e: InventoryInteractEvent) { call(e) }
+    fun onCraftItem(e: CraftItemEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onInventoryOpen(e: InventoryOpenEvent) { call(e) }
+    fun onInventoryClick(e: InventoryClickEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onPrepareAnvil(e: PrepareAnvilEvent) { call(e) }
+    fun onInventoryCreative(e: InventoryCreativeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onPrepareItemCraft(e: PrepareItemCraftEvent) { call(e) }
-    
+    fun onInventoryDrag(e: InventoryDragEvent) {
+        call(e)
+    }
+
+    @EventHandler
+    fun onInventoryOpen(e: InventoryOpenEvent) {
+        call(e)
+    }
+
+    @EventHandler
+    fun onPrepareAnvil(e: PrepareAnvilEvent) {
+        call(e)
+    }
+
+    @EventHandler
+    fun onPrepareItemCraft(e: PrepareItemCraftEvent) {
+        call(e)
+    }
+
     //endregion
 
     //region HangingEvent
-    
-    @EventHandler
-    fun onHangingBreak(e: HangingBreakEvent) { call(e) }
 
     @EventHandler
-    fun onHangingPlace(e: HangingPlaceEvent) { call(e) }
-    
+    fun onHangingBreak(e: HangingBreakEvent) {
+        call(e)
+    }
+
+    @EventHandler
+    fun onHangingPlace(e: HangingPlaceEvent) {
+        call(e)
+    }
+
     //endregion
-    
+
     //region InventoryMoveItemEvent
 
     @EventHandler
-    fun onInventoryMoveItem(e: InventoryMoveItemEvent) { call(e) }
-    
+    fun onInventoryMoveItem(e: InventoryMoveItemEvent) {
+        call(e)
+    }
+
     //endregion
 
     //region InventoryPickupItemEvent
 
     @EventHandler
-    fun onInventoryPickupItem(e: InventoryPickupItemEvent) { call(e) }
+    fun onInventoryPickupItem(e: InventoryPickupItemEvent) {
+        call(e)
+    }
 
     //endregion
+}
 
+object SEventSubscriberListener3 : Listener {
+    private fun <E: Event> call(e: E) {
+        SEventSubscriber.callSubscribeEvent(e)
+    }
+    
+    
     //region AsyncPlayerPreLoginEvent
 
     @EventHandler
-    fun onAsyncPlayerPreLogin(e: AsyncPlayerPreLoginEvent) { call(e) }
+    fun onAsyncPlayerPreLogin(e: AsyncPlayerPreLoginEvent) {
+        call(e)
+    }
 
     //endregion
-    
+
     //region PlayerLeashEntityEvent
 
     @EventHandler
-    fun onPlayerLeashEntity(e: PlayerLeashEntityEvent) { call(e) }
+    fun onPlayerLeashEntity(e: PlayerLeashEntityEvent) {
+        call(e)
+    }
 
     //endregion
-    
+
     //region ServerEvent
 
     @EventHandler
-    fun onBroadcastMessage(e: BroadcastMessageEvent) { call(e) }
+    fun onBroadcastMessage(e: BroadcastMessageEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onMapInitialize(e: MapInitializeEvent) { call(e) }
+    fun onMapInitialize(e: MapInitializeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onPluginEnable(e: PluginEnableEvent) { call(e) }
+    fun onPluginEnable(e: PluginEnableEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onPluginDisable(e: PluginDisableEvent) { call(e) }
+    fun onPluginDisable(e: PluginDisableEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onServerCommand(e: ServerCommandEvent) { call(e) }
+    fun onServerCommand(e: ServerCommandEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onServerListPing(e: ServerListPingEvent) { call(e) }
+    fun onServerListPing(e: ServerListPingEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onServiceRegister(e: ServiceRegisterEvent) { call(e) }
+    fun onServiceRegister(e: ServiceRegisterEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onServiceUnregister(e: ServiceUnregisterEvent) { call(e) }
-    
+    fun onServiceUnregister(e: ServiceUnregisterEvent) {
+        call(e)
+    }
+
     //endregion
 
     //region TabCompleteEvent
 
     @EventHandler
-    fun onTabComplete(e: TabCompleteEvent) { call(e) }
+    fun onTabComplete(e: TabCompleteEvent) {
+        call(e)
+    }
 
     //endregion
 
     //region VehicleEvent
 
     @EventHandler
-    fun onVehicleBlockCollision(e: VehicleBlockCollisionEvent) { call(e) }
+    fun onVehicleBlockCollision(e: VehicleBlockCollisionEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleEntityCollision(e: VehicleEntityCollisionEvent) { call(e) }
+    fun onVehicleEntityCollision(e: VehicleEntityCollisionEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleCreate(e: VehicleCreateEvent) { call(e) }
+    fun onVehicleCreate(e: VehicleCreateEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleDamage(e: VehicleDamageEvent) { call(e) }
-    
-    @EventHandler
-    fun onVehicleDestroy(e: VehicleDestroyEvent) { call(e) }
+    fun onVehicleDamage(e: VehicleDamageEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleEnter(e: VehicleEnterEvent) { call(e) }
+    fun onVehicleDestroy(e: VehicleDestroyEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleExit(e: VehicleExitEvent) { call(e) }
+    fun onVehicleEnter(e: VehicleEnterEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleMove(e: VehicleMoveEvent) { call(e) }
+    fun onVehicleExit(e: VehicleExitEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onVehicleUpdate(e: VehicleUpdateEvent) { call(e) }
+    fun onVehicleMove(e: VehicleMoveEvent) {
+        call(e)
+    }
+
+    @EventHandler
+    fun onVehicleUpdate(e: VehicleUpdateEvent) {
+        call(e)
+    }
 
     //endregion
 
     //region WeatherEvent
 
     @EventHandler
-    fun onLightningStrike(e: LightningStrikeEvent) { call(e) }
+    fun onLightningStrike(e: LightningStrikeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onThunderChange(e: ThunderChangeEvent) { call(e) }
+    fun onThunderChange(e: ThunderChangeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onWeatherChange(e: WeatherChangeEvent) { call(e) }
+    fun onWeatherChange(e: WeatherChangeEvent) {
+        call(e)
+    }
 
     //endregion
 
     //region WorldEvent
 
     @EventHandler
-    fun onChunkLoad(e: ChunkLoadEvent) { call(e) }
+    fun onChunkLoad(e: ChunkLoadEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onChunkPopulate(e: ChunkPopulateEvent) { call(e) }
+    fun onChunkPopulate(e: ChunkPopulateEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onChunkUnload(e: ChunkUnloadEvent) { call(e) }
+    fun onChunkUnload(e: ChunkUnloadEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onPortalCreate(e: PortalCreateEvent) { call(e) }
+    fun onPortalCreate(e: PortalCreateEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onSpawnChange(e: SpawnChangeEvent) { call(e) }
+    fun onSpawnChange(e: SpawnChangeEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onStructureGrow(e: StructureGrowEvent) { call(e) }
+    fun onStructureGrow(e: StructureGrowEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onWorldInit(e: WorldInitEvent) { call(e) }
+    fun onWorldInit(e: WorldInitEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onWorldLoad(e: WorldLoadEvent) { call(e) }
+    fun onWorldLoad(e: WorldLoadEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onWorldSave(e: WorldSaveEvent) { call(e) }
+    fun onWorldSave(e: WorldSaveEvent) {
+        call(e)
+    }
 
     @EventHandler
-    fun onWorldUnload(e: WorldUnloadEvent) { call(e) }
+    fun onWorldUnload(e: WorldUnloadEvent) {
+        call(e)
+    }
 
     //endregion
 }

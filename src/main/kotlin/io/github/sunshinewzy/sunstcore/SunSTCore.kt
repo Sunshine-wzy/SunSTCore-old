@@ -1,8 +1,10 @@
 package io.github.sunshinewzy.sunstcore
 
-import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener
+import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener1
+import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener2
+import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener3
+import io.github.sunshinewzy.sunstcore.listeners.SunSTSubscriber
 import io.github.sunshinewzy.sunstcore.modules.data.DataManager
-import io.github.sunshinewzy.sunstcore.utils.SEventSubscribe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.Bukkit
@@ -12,11 +14,16 @@ import org.bukkit.plugin.java.JavaPlugin
 class SunSTCore : JavaPlugin() {
     
     companion object {
-        private var pluginSunSTCore: JavaPlugin? = null
+        private var plugin: JavaPlugin? = null
         val sunstScope = CoroutineScope(SupervisorJob())
         
+        val logger by lazy { 
+            getPlugin().logger
+        }
+        val pluginManager = Bukkit.getServer().pluginManager
+        
         fun getPlugin(): JavaPlugin {
-            return pluginSunSTCore!!
+            return plugin!!
         }
     }
     
@@ -24,23 +31,32 @@ class SunSTCore : JavaPlugin() {
     
     
     override fun onEnable() {
-        pluginSunSTCore = this
+        plugin = this
 
         DataManager.init()
         registerListeners()
         
         logger.info("SunSTCore 加载成功！")
         
-        SEventSubscribe.test()
+        test()
+        
     }
 
     override fun onDisable() {
-        
+        DataManager.saveData()
     }
     
     
     private fun registerListeners() {
-        pluginManager.registerEvents(SEventSubscriberListener, this)
+        pluginManager.registerEvents(SEventSubscriberListener1, this)
+        pluginManager.registerEvents(SEventSubscriberListener2, this)
+        pluginManager.registerEvents(SEventSubscriberListener3, this)
+        
+        SunSTSubscriber.init()
+    }
+    
+    private fun test() {
+        
     }
     
 }

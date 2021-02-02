@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "1.4.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
@@ -41,16 +39,13 @@ dependencies {
     implementation("io.netty:netty-all:4.1.48.Final")
 
     implementation(kotlin("stdlib-jdk8"))
-    implementation("net.mamoe:mirai-core-qqandroid:1.3.0")
-    compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
 
     compileOnly(fileTree(mapOf("dir" to "cores", "include" to listOf("*.jar"))))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    
+    api("net.mamoe", "mirai-core", "2.2.0")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
 
 tasks {
     jar {
@@ -62,6 +57,6 @@ tasks {
     shadowJar {
         archiveBaseName.set("SunSTCore")
         archiveVersion.set(project.version.toString())
-        destinationDirectory.set(file("F:/Kotlin/Workspace/SkyDream/cores"))
+        destinationDirectory.set(file("F:/Java/Debug/Spigot-1.12/plugins"))
     }
 }
