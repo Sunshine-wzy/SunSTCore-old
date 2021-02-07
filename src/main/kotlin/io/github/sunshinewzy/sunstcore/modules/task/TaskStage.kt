@@ -1,7 +1,11 @@
 package io.github.sunshinewzy.sunstcore.modules.task
 
 import io.github.sunshinewzy.sunstcore.objects.SItem
+import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.setName
+import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.setNameAndLore
 import io.github.sunshinewzy.sunstcore.objects.inventoryholder.SProtectInventoryHolder
+import io.github.sunshinewzy.sunstcore.objects.item.TaskGuideItem
+import io.github.sunshinewzy.sunstcore.objects.orderWith
 import io.github.sunshinewzy.sunstcore.utils.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -35,8 +39,14 @@ class TaskStage(
 
         subscribeEvent<InventoryClickEvent> {
             if(inventory.holder == this@TaskStage.holder){
+                val player = view.getSPlayer()
+                
+                if(slot == 5 orderWith 5){
+                    taskProject.openTaskInv(player)
+                    return@subscribeEvent
+                }
+                
                 taskMap.values.forEach {
-                    val player = view.getSPlayer()
                     if(slot == it.order && player.hasCompleteTask(it.predecessor)){
                         it.openTaskInv(player)
                     }
@@ -45,18 +55,40 @@ class TaskStage(
         }
     }
 
-    override fun openTaskInv(p: Player) {
+    override fun openTaskInv(p: Player, inv: Inventory) {
         p.world.playSound(p.location, openSound, volume, pitch)
-        p.openInventory(getTaskInv(p))
+        p.openInventory(inv)
     }
 
     override fun getTaskInv(p: Player): Inventory {
         val inv = Bukkit.createInventory(holder, invSize * 9, stageName)
         inv.createEdge(invSize, edgeItem)
+        inv.setItem(5, 5, TaskGuideItem.HOME.item)
+        
         taskMap.values.forEach { 
             val pre = it.predecessor
+            var name = "§f[§"
+            
             if(pre == null || p.hasCompleteTask(pre)){
-                inv.setItem(it.order, it.symbol)
+                val symbol = it.getSymbol()
+                
+                name += if(p.hasCompleteTask(it)) "a" else "e"
+                name += it.taskName + "§f]"
+                
+                inv.setItem(it.order, symbol.setName(name))
+            }
+            else{
+                val pPre = pre.predecessor
+                if(pPre == null || p.hasCompleteTask(pPre)){
+                    val symbol = it.getSymbol()
+                    name += "c" + it.taskName + "§f]"
+
+                    inv.setItem(it.order, symbol.setNameAndLore(
+                        name,
+                        "§e此任务尚未解锁，无法查看",
+                        "§c您需要解锁此任务的前置任务来解锁此任务"
+                    ))
+                }
             }
         }
         

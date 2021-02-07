@@ -13,7 +13,6 @@ import java.io.File
 
 object DataManager : Initable {
     private val dir = SunSTCore.getPlugin().dataFolder
-    private val dataDir = File(dir, "data")
     
     val sPlayerData = HashMap<String, SunSTPlayerData>()
     val sTaskData = HashMap<String, STaskData>()
@@ -22,10 +21,10 @@ object DataManager : Initable {
     
     
     override fun init() {
-        loadFolderData("SPlayer"){
-            file, fileName ->
-            SunSTPlayerData(SunSTCore.getPlugin(), fileName, file)
-        }
+//        loadFolderData("SPlayer"){
+//            file, fileName ->
+//            SunSTPlayerData(SunSTCore.getPlugin(), fileName, file).load()
+//        }
         
         subscribeEvent<PlayerJoinEvent> { 
             val uid = player.uniqueId.toString()
@@ -49,7 +48,7 @@ object DataManager : Initable {
     
     private fun loadFolderData(
         folderName: String,
-        dirFolder: File = File(dataDir, folderName),
+        dirFolder: File = File(dir, folderName),
         block: (file: File, fileName: String) -> Unit
     ) {
         if(!dirFolder.exists()) return
@@ -79,6 +78,7 @@ object DataManager : Initable {
         
         val data = SunSTPlayerData(SunSTCore.getPlugin(), uid)
         data.load()
+        
         sPlayerData[uid] = data
         return data
     }

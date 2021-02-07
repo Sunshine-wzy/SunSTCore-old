@@ -1,62 +1,44 @@
 package io.github.sunshinewzy.sunstcore.utils
 
+import io.github.sunshinewzy.sunstcore.interfaces.Itemable
 import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.isItemSimilar
-import org.bukkit.Bukkit
-import org.bukkit.Sound
+import io.github.sunshinewzy.sunstcore.objects.orderWith
+import org.bukkit.*
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
-import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.InventoryView
-import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.*
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
 
-//region 快速创建边框
-
-/**
- * 快速创建 5*9 边框
- */
-fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
-    val meta = if (edgeItem.hasItemMeta()) edgeItem.itemMeta else Bukkit.getItemFactory().getItemMeta(edgeItem.type)
-    meta.displayName = "§f"
-    edgeItem.itemMeta = meta
-    
-    for(i in 0..8) {
-        setItem(i, edgeItem)
-        setItem(i + 9 * (invSize - 1), edgeItem)
-    }
-    for(i in 9..9*(invSize - 2) step 9) {
-        setItem(i, edgeItem)
-        setItem(i + 8, edgeItem)
-    }
-}
-
-//endregion
-
-//region 对象转化
+//region Any 对象
 
 /**
  * Object转Map
  */
-fun <K, V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>): MutableMap<K, V>? {
+inline fun <reified K, reified V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>): MutableMap<K, V>? {
     val result = HashMap<K, V>()
     if (this is Map<*, *>) {
         for ((key, value) in this) {
-            result[kClazz.cast(key)] = vClazz.cast(value)
+            if(key is K && value is V){
+                result[kClazz.cast(key)] = vClazz.cast(value)
+            }
         }
         return result
     }
     return null
 }
 
-fun <K, V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>, targetMap: MutableMap<K, V>): Boolean {
+inline fun <reified K, reified V> Any.castMap(kClazz: Class<K>, vClazz: Class<V>, targetMap: MutableMap<K, V>): Boolean {
     if (this is Map<*, *>) {
         for ((key, value) in this) {
-            targetMap[kClazz.cast(key)] = vClazz.cast(value)
+            if(key is K && value is V)
+                targetMap[kClazz.cast(key)] = vClazz.cast(value)
         }
         return true
     }
@@ -69,30 +51,44 @@ inline fun <reified K, reified V> Any.castMap(targetMap: MutableMap<K, V>): Bool
     return false
 }
 
+fun Any.castMapBoolean(): MutableMap<String, Boolean> {
+    val map = HashMap<String, Boolean>()
+    
+    if(this is Map<*, *>){
+        forEach { key, value -> 
+            if(key is String && value is Boolean){
+                map[key] = value
+            }
+        }
+    }
+    
+    return map
+}
+
 //endregion
 
-//region 任务模块
+//region TaskModule 任务模块
 
 fun Player.hasCompleteTask(task: TaskBase?): Boolean {
     if(task == null) return true
     
     val taskProject = task.taskStage.taskProject
-    val progress = taskProject.getProgress(this) ?: return false
+    val progress = taskProject.getProgress(this)
     
-    return progress.hasCompleteTask(this, task)
+    return progress.hasCompleteTask(task)
 }
 
 fun Player.hasCompleteStage(stage: TaskStage?): Boolean {
     if(stage == null) return true
     if(stage.finalTask == null) return true
     
-    val progress = stage.taskProject.getProgress(this) ?: return false
-    return progress.hasCompleteStage(this, stage)
+    val progress = stage.taskProject.getProgress(this)
+    return progress.hasCompleteStage(stage)
 }
 
 //endregion
 
-//region 玩家 Player
+//region Player 玩家
 
 fun Player.openInvWithSound(inv: Inventory, openSound: Sound, volume: Float, pitch: Float) {
     world.playSound(location, openSound, volume, pitch)
@@ -113,6 +109,16 @@ fun Player.giveItem(item: ItemStack) {
     }
 }
 
+fun Player.giveItem(items: Array<ItemStack>) {
+    items.forEach { 
+        giveItem(it)
+    }
+}
+
+fun Player.giveItem(item: Itemable) {
+    giveItem(item.getTheItem())
+}
+
 /**
  * 获取 [taskProject] 的任务进度
  */
@@ -127,9 +133,9 @@ fun Player.getProgress(task: TaskBase): TaskProgress = getProgress(task.taskStag
  * 完成某项任务
  * @param task 任务
  */
-fun Player.finishTask(task: TaskBase) {
+fun Player.completeTask(task: TaskBase, isCompleted: Boolean = true) {
     val progress = getProgress(task)
-    
+    progress.completeTask(task, isCompleted)
 }
 
 /**
@@ -139,9 +145,24 @@ fun Player.sendMsg(msg: String) {
     sendMessage(msg.replace('&', '§'))
 }
 
+/**
+ * 生成粒子效果
+ */
+private fun Player.spawnParticle(particle: Particle, listLoc: List<Location>, count: Int) {
+    listLoc.forEach {
+        spawnParticle(particle, it, count)
+    }
+}
+
+private fun Player.spawnParticle(particle: Particle, listLoc: List<Location>, count: Int, offsetX: Double, offsetY: Double, offsetZ: Double) {
+    listLoc.forEach {
+        spawnParticle(particle, it, count, offsetX, offsetY, offsetZ)
+    }
+}
+
 //endregion
 
-//region Inventory
+//region Inventory 物品栏
 
 /**
  * 判断物品栏中是否含有 [amount] 数量的物品 [item]
@@ -151,6 +172,8 @@ fun Inventory.containsItem(item: ItemStack, amount: Int = 1): Boolean {
     
     var cnt = amount
     storageContents.forEach {
+        if(it == null) return@forEach
+        
         if (it.isItemSimilar(item)) {
             cnt -= it.amount
             if (cnt <= 0) return true
@@ -169,13 +192,74 @@ fun Inventory.containsItem(items: Array<ItemStack>): Boolean {
 
 fun Inventory.isFull(): Boolean = firstEmpty() > size
 
+fun Inventory.setItem(x: Int, y: Int, item: ItemStack) {
+    setItem(x orderWith y, item)
+}
+
+/**
+ * 快速创建 5*9 边框
+ */
+fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
+    val meta = if (edgeItem.hasItemMeta()) edgeItem.itemMeta else Bukkit.getItemFactory().getItemMeta(edgeItem.type)
+    meta.displayName = "§f"
+    edgeItem.itemMeta = meta
+
+    for(i in 0..8) {
+        setItem(i, edgeItem)
+        setItem(i + 9 * (invSize - 1), edgeItem)
+    }
+    for(i in 9..9*(invSize - 2) step 9) {
+        setItem(i, edgeItem)
+        setItem(i + 8, edgeItem)
+    }
+}
+
+
 fun InventoryView.getSPlayer(): Player = player as Player
 
 //endregion
 
-//region File
+//region File 文件
 
 fun File.getDataPath(plugin: JavaPlugin) 
-    = absolutePath.split("(?<=${plugin.dataFolder.absolutePath}/)[\\s\\S]*(?=/$name.yml)".toRegex()).last()
+    = absolutePath.split("(?<=${plugin.dataFolder.absolutePath.replace('\\', '/')}/)[\\s\\S]*(?=/$name)".toRegex()).last()
+
+//endregion
+
+//region Recipe 配方
+
+fun ShapedRecipe.getRecipe(): Array<ItemStack> {
+    val recipe = Array(9) { ItemStack(Material.AIR) }
+    val rows = shape
+    val ingredients = ingredientMap
+    
+    for(i in rows.indices){
+        val base = i * 3
+        val str = rows[i]
+        
+        for(j in str.indices){
+            if(str[j] != ' '){
+                val item = ingredients[str[j]] ?: continue
+                recipe[base + j] = ItemStack(item.type)
+            }
+        }
+    }
+    
+    return recipe
+}
+
+//endregion
+
+//region Block 方块
+
+fun Block.getDurability() = state.data.toItemStack(1).durability
+
+fun Block.getFaceLocation(face: BlockFace): Location = location.getFaceLocation(face)
+
+//endregion
+
+//region Location 坐标
+
+fun Location.getFaceLocation(face: BlockFace): Location = clone().add(face.modX.toDouble(), face.modY.toDouble(), face.modZ.toDouble())
 
 //endregion

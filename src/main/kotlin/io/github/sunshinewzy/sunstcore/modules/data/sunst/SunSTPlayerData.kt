@@ -35,17 +35,5 @@ class SunSTPlayerData : SPlayerData {
         getMap("taskProgress", taskProgress)
         getMap("isFirstJoinGive", isFirstJoinGive)
         
-//        if(config.contains("taskProgress")){
-//            val mapTaskProject = config["taskProgress"].castMap(String::class.java, MutableMap::class.java) ?: return
-//            mapTaskProject.forEach forEach1@{ (tProjectName, tProject) ->
-//                val resMapTaskStage = HashMap<String, MutableMap<String, Boolean>>()
-//                val mapTaskStage = tProject.castMap(String::class.java, MutableMap::class.java) ?: return@forEach1
-//                mapTaskStage.forEach forEach2@{ (tStageName, tStage) ->
-//                    val mapTaskBase = tStage.castMap(String::class.java, Boolean::class.java) ?: return@forEach2
-//                    resMapTaskStage[tStageName] = mapTaskBase
-//                }
-//                taskProgress[tProjectName] = resMapTaskStage
-//            }
-//        }
     }
 }

@@ -62,9 +62,9 @@ class TaskProject(
     }
 
 
-    override fun openTaskInv(p: Player) {
+    override fun openTaskInv(p: Player, inv: Inventory) {
         p.world.playSound(p.location, openSound, volume, pitch)
-        p.openInventory(getTaskInv(p))
+        p.openInventory(inv)
     }
     
     override fun getTaskInv(p: Player): Inventory {

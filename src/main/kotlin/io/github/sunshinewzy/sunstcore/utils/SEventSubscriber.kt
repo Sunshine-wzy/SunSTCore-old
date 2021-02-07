@@ -7,6 +7,7 @@ object SEventSubscriber {
     private val subscribers = HashMap<String, ArrayList<(Event) -> Unit>>()
     
     
+    @Suppress("UNCHECKED_CAST")
     fun <E: Event> subscribeEvent(eventClass: Class<out E>, block: (event: E) -> Unit) {
         val name = eventClass.name
         val eventBlock = block as (Event) -> Unit

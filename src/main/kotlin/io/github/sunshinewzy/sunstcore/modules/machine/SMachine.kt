@@ -1,11 +1,19 @@
 package io.github.sunshinewzy.sunstcore.modules.machine
 
-import io.github.sunshinewzy.sunstcore.objects.SBlock
-
-abstract class SMachine(val structure: Array<Array<Array<SBlock>>>) {
+abstract class SMachine(val structure: MachineStructure) {
     
     abstract fun runMachine()
     
     
-
+    fun judgeStructure(): Boolean {
+        
+        
+        return false
+    }
+    
+    open fun specialJudge(): Boolean {
+        
+        return true
+    }
+    
 }

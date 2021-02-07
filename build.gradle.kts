@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "1.4.21"
+    val kotlinVersion = "1.4.30"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
@@ -27,6 +27,10 @@ repositories {
         name = "sonatype"
         url = uri("https://oss.sonatype.org/content/groups/public/")
     }
+    maven { 
+        name = "CodeMC"
+        url = uri("https://repo.codemc.org/repository/maven-public")
+    }
 
     jcenter()
 }
@@ -43,7 +47,7 @@ dependencies {
     compileOnly(fileTree(mapOf("dir" to "cores", "include" to listOf("*.jar"))))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     
-    api("net.mamoe", "mirai-core", "2.2.0")
+    api("net.mamoe", "mirai-core", "2.3.2")
 }
 
 
@@ -58,5 +62,6 @@ tasks {
         archiveBaseName.set("SunSTCore")
         archiveVersion.set(project.version.toString())
         destinationDirectory.set(file("F:/Java/Debug/Spigot-1.12/plugins"))
+        
     }
 }

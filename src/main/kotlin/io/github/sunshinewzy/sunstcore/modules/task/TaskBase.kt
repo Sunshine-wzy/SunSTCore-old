@@ -1,11 +1,14 @@
 package io.github.sunshinewzy.sunstcore.modules.task
 
-import io.github.sunshinewzy.sunstcore.objects.inventoryholder.SProtectInventoryHolder
+import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.item.TaskGuideItem
 import io.github.sunshinewzy.sunstcore.objects.orderWith
+import io.github.sunshinewzy.sunstcore.utils.completeTask
 import io.github.sunshinewzy.sunstcore.utils.createEdge
+import io.github.sunshinewzy.sunstcore.utils.giveItem
 import io.github.sunshinewzy.sunstcore.utils.sendMsg
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.entity.Player
@@ -17,23 +20,19 @@ abstract class TaskBase(
     val taskName: String,
     var order: Int,
     var predecessor: TaskBase?,
-    var symbol: ItemStack,
+    private val symbol: ItemStack,
     var reward: Array<ItemStack>,
     var openSound: Sound = taskStage.openSound,
     var volume: Float = taskStage.volume,
     var pitch: Float = taskStage.pitch,
     var invSize: Int = 5
 ): ConfigurationSerializable, TaskInventory {
-    protected val holder = SProtectInventoryHolder(
-        Triple(taskStage.taskProject.projectName, taskStage.stageName, taskName)
-    )
+    protected val holder = TaskInventoryHolder(this)
     
     private val slotItems = HashMap<Int, ItemStack>()
     
     init {
         taskStage.taskMap[taskName] = this
-        
-        
     }
     
     
@@ -56,9 +55,9 @@ abstract class TaskBase(
     }
     
     
-    override fun openTaskInv(p: Player) {
+    override fun openTaskInv(p: Player, inv: Inventory) {
         p.world.playSound(p.location, openSound, volume, pitch)
-        p.openInventory(getTaskInv(p))
+        p.openInventory(inv)
     }
     
     override fun getTaskInv(p: Player): Inventory {
@@ -71,6 +70,9 @@ abstract class TaskBase(
         
         return inv
     }
+    
+    
+    fun getSymbol(): ItemStack = symbol.clone()
     
     fun setSlotItem(order: Int, item: ItemStack): Boolean {
         if(order >= invSize * 9) return false
@@ -87,11 +89,31 @@ abstract class TaskBase(
 
     fun againSubmitTask(player: Player) {
         player.world.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 0.8f)
-        player.sendMsg("&c您已完成过任务 $taskName 了，不能重复提交！")
+        player.sendMsg("&c您已完成过任务 &f[&a$taskName&f]&c 了，不能重复提交！")
     }
     
     fun requireNotEnough(player: Player) {
         player.world.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1.2f)
         player.sendMsg("&c你的背包中没有所需物品！")
+    }
+    
+    fun completeTask(player: Player) {
+        player.completeTask(this)
+        player.giveItem(reward)
+        player.world.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 0.2f)
+        player.sendTitle("§f[§e$taskName§f]", "§a任务完成", 10, 70, 20)
+        player.closeInventory()
+    }
+
+    
+    companion object {
+        fun SItem.Companion.createTaskSymbol(type: Material, firstLore: String = "§a>点我查看任务<", vararg lore: String = arrayOf()): SItem {
+            val loreList = ArrayList<String>()
+            loreList.add(firstLore)
+            if(lore.isNotEmpty())
+                loreList.addAll(lore)
+
+            return SItem(type, loreList)
+        }
     }
 }

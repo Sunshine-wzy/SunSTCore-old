@@ -1,13 +1,19 @@
 package io.github.sunshinewzy.sunstcore
 
-import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener1
-import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener2
-import io.github.sunshinewzy.sunstcore.listeners.SEventSubscriberListener3
-import io.github.sunshinewzy.sunstcore.listeners.SunSTSubscriber
+import io.github.sunshinewzy.sunstcore.bstats.Metrics
+import io.github.sunshinewzy.sunstcore.listeners.*
 import io.github.sunshinewzy.sunstcore.modules.data.DataManager
+import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
+import io.github.sunshinewzy.sunstcore.objects.SItem
+import io.github.sunshinewzy.sunstcore.objects.item.SunSTItem
+import io.github.sunshinewzy.sunstcore.utils.SReflect
+import io.github.sunshinewzy.sunstcore.utils.giveItem
+import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.Bukkit
+import org.bukkit.configuration.serialization.ConfigurationSerialization
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -28,13 +34,16 @@ class SunSTCore : JavaPlugin() {
     }
     
     val pluginManager: PluginManager = Bukkit.getServer().pluginManager
-    
-    
+
+
     override fun onEnable() {
         plugin = this
 
-        DataManager.init()
+        registerSerialization()
         registerListeners()
+        init()
+        
+        val metrics = Metrics(this, 10212)
         
         logger.info("SunSTCore 加载成功！")
         
@@ -45,18 +54,35 @@ class SunSTCore : JavaPlugin() {
     override fun onDisable() {
         DataManager.saveData()
     }
-    
+
+
+    private fun init() {
+        DataManager.init()
+        SItem.initAction()
+        SReflect.init()
+    }
     
     private fun registerListeners() {
-        pluginManager.registerEvents(SEventSubscriberListener1, this)
-        pluginManager.registerEvents(SEventSubscriberListener2, this)
-        pluginManager.registerEvents(SEventSubscriberListener3, this)
+        pluginManager.apply {
+            registerEvents(SEventSubscriberListener1, this@SunSTCore)
+            registerEvents(SEventSubscriberListener2, this@SunSTCore)
+            registerEvents(SEventSubscriberListener3, this@SunSTCore)
+            
+            registerEvents(BlockListener, this@SunSTCore)
+        }
         
         SunSTSubscriber.init()
     }
     
+    private fun registerSerialization() {
+        ConfigurationSerialization.registerClass(TaskProgress::class.java)
+    }
+    
+    
     private fun test() {
-        
+        subscribeEvent<PlayerJoinEvent> { 
+            player.giveItem(SunSTItem.CONSTRUCTIONSTICK_GOLD.item)
+        }
     }
     
 }

@@ -1,8 +1,7 @@
 package io.github.sunshinewzy.sunstcore.modules.task
 
-import io.github.sunshinewzy.sunstcore.utils.castMap
+import io.github.sunshinewzy.sunstcore.utils.castMapBoolean
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import org.bukkit.entity.Player
 
 /**
  * 任务进度
@@ -17,16 +16,41 @@ class TaskProgress() : ConfigurationSerializable {
     
     constructor(map: Map<String, Any>) : this() {
         map.forEach { (key, value) ->
-            val mapCast = value.castMap(String::class.java, Boolean::class.java) ?: return@forEach
+            if(key == "==") return@forEach
+            
+            val mapCast = value.castMapBoolean()
             progress[key] = mapCast
         }
     }
     
     
-    override fun serialize(): MutableMap<String, Any> = mutableMapOf("progress" to progress)
+    override fun serialize(): Map<String, Any> {
+        val map = HashMap<String, Any>()
+        
+        progress.forEach { (key, value) -> 
+            map[key] = value
+        }
+        
+        return map
+    }
     
     
-    fun hasCompleteTask(p: Player, task: TaskBase): Boolean {
+    fun completeTask(task: TaskBase, isCompleted: Boolean = true) {
+        val stageName = task.taskStage.stageName
+        val taskName = task.taskName
+
+        if(progress.containsKey(stageName)){
+            val stagePro = progress[stageName] ?: kotlin.run { 
+                val map = HashMap<String, Boolean>()
+                progress[stageName] = map
+                map
+            }
+            stagePro[taskName] = isCompleted
+        }
+        else progress[stageName] = hashMapOf(taskName to isCompleted)
+    }
+    
+    fun hasCompleteTask(task: TaskBase): Boolean {
         val taskStage = task.taskStage
         
         if(progress.containsKey(taskStage.stageName)){
@@ -42,7 +66,7 @@ class TaskProgress() : ConfigurationSerializable {
         return false
     }
     
-    fun hasCompleteStage(p: Player, taskStage: TaskStage): Boolean {
+    fun hasCompleteStage(taskStage: TaskStage): Boolean {
         val finalTask = taskStage.finalTask ?: return true
 
         if(progress.containsKey(taskStage.stageName)){

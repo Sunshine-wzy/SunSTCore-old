@@ -15,7 +15,7 @@ import java.io.IOException
  * @param saveTime 自动保存时间间隔
  */
 abstract class SAutoSaveData(
-    val plugin: JavaPlugin,
+    private val plugin: JavaPlugin,
     val name: String,
     val path: String = "",
     val saveTime: Long = 600_000
@@ -69,7 +69,6 @@ abstract class SAutoSaveData(
 
     /**
      * 加载配置文件
-     * 实例化类后请主动调用
      */
     fun load() {
         getConfig().loadConfig()
