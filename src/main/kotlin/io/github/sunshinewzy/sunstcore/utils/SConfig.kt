@@ -1,5 +1,6 @@
 package io.github.sunshinewzy.sunstcore.utils
 
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 
@@ -25,6 +26,7 @@ object SConfig {
                 value.addAll(list)
             }
         }
+        
     }
     
     

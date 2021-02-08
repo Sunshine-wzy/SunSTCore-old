@@ -16,7 +16,12 @@ enum class SunSTItem(val item: ItemStack) : Itemable {
         SItem(Material.IRON_SPADE, "§f铁制建筑手杖", "§e将我拿在副手", "§e用主手放方块", "§a就能一次放置3个方块")
     ),
     CONSTRUCTIONSTICK_GOLD(
-        SItem(Material.GOLD_SPADE, "§e金制建筑手杖", "§a将我拿在主手并对准方块", "§a(请确保背包中有该方块)")
+        ConstructionStick(SItem(
+            Material.GOLD_SPADE,
+            "§e金制建筑手杖",
+            "§a将我拿在主手并对准方块",
+            "§a(请确保背包中有该方块)"
+        ), 5)
     )
     
     

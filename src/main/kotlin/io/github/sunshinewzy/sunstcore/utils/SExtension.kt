@@ -1,6 +1,8 @@
 package io.github.sunshinewzy.sunstcore.utils
 
+import io.github.sunshinewzy.sunstcore.SunSTCore
 import io.github.sunshinewzy.sunstcore.interfaces.Itemable
+import io.github.sunshinewzy.sunstcore.listeners.BlockListener
 import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
@@ -10,7 +12,9 @@ import io.github.sunshinewzy.sunstcore.objects.orderWith
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.BlockFace.*
 import org.bukkit.entity.Player
+import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.*
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
@@ -148,16 +152,37 @@ fun Player.sendMsg(msg: String) {
 /**
  * 生成粒子效果
  */
-private fun Player.spawnParticle(particle: Particle, listLoc: List<Location>, count: Int) {
+fun Player.spawnParticle(particle: Particle, listLoc: List<Location>, count: Int) {
     listLoc.forEach {
         spawnParticle(particle, it, count)
     }
 }
 
-private fun Player.spawnParticle(particle: Particle, listLoc: List<Location>, count: Int, offsetX: Double, offsetY: Double, offsetZ: Double) {
+fun Player.spawnParticle(particle: Particle, listLoc: List<Location>, count: Int, offsetX: Double, offsetY: Double, offsetZ: Double) {
     listLoc.forEach {
         spawnParticle(particle, it, count, offsetX, offsetY, offsetZ)
     }
+}
+
+/**
+ * 在玩家权限允许的范围内尝试放置方块
+ * @param loc 放置方块的位置
+ * @param clickedBlock 玩家点击的方块
+ * @param item 尝试放置的物品
+ * @param block 判断是否放置方块的代码块
+ */
+fun Player.tryToPlaceBlock(loc: Location, clickedBlock: Block, item: ItemStack, block: BlockPlaceEvent.() -> Boolean) {
+    val event = BlockPlaceEvent(
+        loc.block,
+        loc.block.state,
+        clickedBlock,
+        item,
+        this,
+        SReflect.canBuild(world, this, loc.blockX, loc.blockZ),
+        EquipmentSlot.HAND
+    )
+    BlockListener.tryToPlaceBlockLocations[loc.clone()] = block
+    SunSTCore.pluginManager.callEvent(event)
 }
 
 //endregion
@@ -186,6 +211,37 @@ fun Inventory.containsItem(item: ItemStack, amount: Int = 1): Boolean {
 fun Inventory.containsItem(items: Array<ItemStack>): Boolean {
     items.forEach { 
         if(!containsItem(it)) return false
+    }
+    return true
+}
+
+/**
+ * 移除物品栏中 [amount] 数量的物品 [item]
+ */
+fun Inventory.removeSItem(item: ItemStack, amount: Int = 1): Boolean {
+    if(amount <= 0) return true
+
+    var cnt = amount
+    storageContents.forEach {
+        if(it == null) return@forEach
+
+        if (it.isItemSimilar(item)) {
+            val theCnt = cnt
+            cnt -= it.amount
+
+            if(it.amount > theCnt) it.amount -= theCnt
+            else it.amount = 0
+            
+            if (cnt <= 0) return true
+        }
+    }
+
+    return false
+}
+
+fun Inventory.removeSItem(items: Array<ItemStack>): Boolean {
+    items.forEach { 
+        if(!removeSItem(it)) return false
     }
     return true
 }
@@ -256,9 +312,17 @@ fun Block.getDurability() = state.data.toItemStack(1).durability
 
 fun Block.getFaceLocation(face: BlockFace): Location = location.getFaceLocation(face)
 
+fun BlockFace.transform(): List<BlockFace> =
+    when(this) {
+        NORTH, SOUTH -> arrayListOf(EAST, WEST, UP, DOWN)
+        EAST, WEST -> arrayListOf(NORTH, SOUTH, UP, DOWN)
+        UP, DOWN -> arrayListOf(NORTH, SOUTH, EAST, WEST)
+        else -> arrayListOf()
+    }
+
 //endregion
 
-//region Location 坐标
+//region Location 位置
 
 fun Location.getFaceLocation(face: BlockFace): Location = clone().add(face.modX.toDouble(), face.modY.toDouble(), face.modZ.toDouble())
 

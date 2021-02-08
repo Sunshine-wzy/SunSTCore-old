@@ -12,7 +12,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPlaceEvent
 
 object BlockListener : Listener {
-    
+    val tryToPlaceBlockLocations = HashMap<Location, BlockPlaceEvent.() -> Boolean>()
     val blockPlacedByConstructionStick = ArrayList<Location>()
     
     
@@ -40,6 +40,16 @@ object BlockListener : Listener {
 //                }
                 
                 blockPlacedByConstructionStick.remove(loc)
+            }
+            
+            if(tryToPlaceBlockLocations.containsKey(loc)){
+                if(!e.isCancelled && item != null && item.type != Material.AIR && item.amount > 0){
+                    val theBlock = tryToPlaceBlockLocations[loc] ?: return
+                    if(theBlock(e))
+                        SBlock(item).setLocation(loc)
+                }
+                
+                tryToPlaceBlockLocations.remove(loc)
             }
         }
     }
