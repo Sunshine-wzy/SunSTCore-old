@@ -12,6 +12,7 @@ import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.PluginManager
@@ -83,6 +84,7 @@ class SunSTCore : JavaPlugin() {
         subscribeEvent<PlayerJoinEvent> {
             
         }
+        
     }
     
 }

@@ -11,9 +11,9 @@ class SBlock(val material: Material, val data: MaterialData) {
     var name = ""
     
     
-    constructor(material: Material, durability: Byte) : this(material, MaterialData(material, durability))
+    constructor(material: Material, durability: Byte = 0) : this(material, MaterialData(material, durability))
     
-    constructor(material: Material, durability: Byte, name: String) : this(material, durability) {
+    constructor(material: Material, durability: Byte = 0, name: String) : this(material, durability) {
         this.name = name
     }
     
