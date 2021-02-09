@@ -45,9 +45,9 @@ object SReflect : Initable {
     
     fun ItemStack.asNMSCopy(): Any = methodItemAsNMSCopy.invoke(null, this)
     
-    fun ItemStack.damage(i: Int, player: Player): ItemStack {
+    fun ItemStack.damage(damage: Int, player: Player): ItemStack {
         val nmsItem = asNMSCopy()
-        methodItemDamage.invoke(nmsItem, i, player.getEntityPlayer())
+        methodItemDamage.invoke(nmsItem, damage, player.getEntityPlayer())
         return methodItemAsBukkitCopy(null, nmsItem) as ItemStack
     }
     

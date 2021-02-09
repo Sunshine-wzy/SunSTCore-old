@@ -5,22 +5,29 @@ import io.github.sunshinewzy.sunstcore.interfaces.Itemable
 import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.addRecipe
 import io.github.sunshinewzy.sunstcore.objects.SShapedRecipe
+import io.github.sunshinewzy.sunstcore.objects.item.constructionstick.LineStick
+import io.github.sunshinewzy.sunstcore.objects.item.constructionstick.RangeStick
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.block.BlockFace
 
 enum class SunSTItem(val item: ItemStack) : Itemable {
     CONSTRUCTIONSTICK_IRON(
-        SItem(Material.IRON_SPADE, "§f铁制建筑手杖", "§e将我拿在副手", "§e用主手放方块", "§a就能一次放置3个方块")
+        LineStick(SItem(
+            Material.IRON_SPADE,
+            "§f铁制建筑手杖",
+            "§e将我拿在副手",
+            "§e用主手放方块",
+            "§a[建造长度: 3]"
+        ), 3)
     ),
-    CONSTRUCTIONSTICK_GOLD(
-        ConstructionStick(SItem(
-            Material.GOLD_SPADE,
-            "§e金制建筑手杖",
-            "§a将我拿在主手并对准方块",
-            "§a(请确保背包中有该方块)"
+    CONSTRUCTIONSTICK_DIAMOND(
+        RangeStick(SItem(
+            Material.DIAMOND_SPADE,
+            "§b钻石建筑手杖",
+            "§e将我拿在主手并对准方块",
+            "§e(请确保背包中有该方块)",
+            "§a[最大建造半径: 5]"
         ), 5)
     )
     
@@ -48,5 +55,5 @@ enum class SunSTItem(val item: ItemStack) : Itemable {
     }
 
 
-    override fun getTheItem(): ItemStack = item
+    override fun getSItem(): ItemStack = item
 }

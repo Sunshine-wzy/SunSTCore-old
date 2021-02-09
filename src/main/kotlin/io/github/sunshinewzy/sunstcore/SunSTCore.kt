@@ -80,8 +80,8 @@ class SunSTCore : JavaPlugin() {
     
     
     private fun test() {
-        subscribeEvent<PlayerJoinEvent> { 
-            player.giveItem(SunSTItem.CONSTRUCTIONSTICK_GOLD.item)
+        subscribeEvent<PlayerJoinEvent> {
+            
         }
     }
     

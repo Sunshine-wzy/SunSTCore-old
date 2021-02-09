@@ -93,7 +93,7 @@ open class SItem(item: ItemStack) : ItemStack(item) {
                 if(item == null || item.type == Material.AIR) return@subscribeEvent
                 
                 itemActions.forEach { (sItem, blocks) -> 
-                    if(item == sItem){
+                    if(sItem == item){
                         blocks.forEach { it(this) }
                     }
                 }

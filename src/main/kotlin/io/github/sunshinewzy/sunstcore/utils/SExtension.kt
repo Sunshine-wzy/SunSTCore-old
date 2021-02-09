@@ -9,6 +9,7 @@ import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.isItemSimilar
 import io.github.sunshinewzy.sunstcore.objects.orderWith
+import io.github.sunshinewzy.sunstcore.utils.SReflect.damage
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
@@ -120,7 +121,7 @@ fun Player.giveItem(items: Array<ItemStack>) {
 }
 
 fun Player.giveItem(item: Itemable) {
-    giveItem(item.getTheItem())
+    giveItem(item.getSItem())
 }
 
 /**
@@ -183,6 +184,14 @@ fun Player.tryToPlaceBlock(loc: Location, clickedBlock: Block, item: ItemStack, 
     )
     BlockListener.tryToPlaceBlockLocations[loc.clone()] = block
     SunSTCore.pluginManager.callEvent(event)
+}
+
+fun Player.damageItemInMainHand(damage: Int = 1) {
+    inventory.itemInMainHand = inventory.itemInMainHand.damage(damage, this)
+}
+
+fun Player.damageItemInOffHand(damage: Int = 1) {
+    inventory.itemInOffHand = inventory.itemInOffHand.damage(damage, this)
 }
 
 //endregion
@@ -312,13 +321,20 @@ fun Block.getDurability() = state.data.toItemStack(1).durability
 
 fun Block.getFaceLocation(face: BlockFace): Location = location.getFaceLocation(face)
 
-fun BlockFace.transform(): List<BlockFace> =
+fun BlockFace.transform(): MutableList<BlockFace> =
     when(this) {
         NORTH, SOUTH -> arrayListOf(EAST, WEST, UP, DOWN)
         EAST, WEST -> arrayListOf(NORTH, SOUTH, UP, DOWN)
         UP, DOWN -> arrayListOf(NORTH, SOUTH, EAST, WEST)
         else -> arrayListOf()
     }
+
+fun BlockFace.transform(excludeFace: BlockFace): MutableList<BlockFace> {
+    val list = transform()
+    list.remove(excludeFace)
+    list.remove(excludeFace.oppositeFace)
+    return list
+}
 
 //endregion
 

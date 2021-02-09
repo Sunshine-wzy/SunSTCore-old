@@ -23,9 +23,10 @@ class SBlock(val material: Material, val data: MaterialData) {
     
     
     fun setLocation(loc: Location) {
-        val block = loc.block
+        val block = loc.block ?: return
         block.type = material
-        block.state.data = data
+        val blockState = block.state ?: return
+        blockState.data = data
     }
     
     fun isSimilar(block: BlockState): Boolean
