@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack
  * @param item 作为建筑手杖的物品
  * 
  * 请确保同一物品只构造一遍(构造时会自动注册该物品为建筑手杖)
+ * 请确保在插件初始化阶段就构造该物品, 否则可能会出现失效情况
  */
 abstract class ConstructionStick(item: ItemStack) : SItem(item) {
     
@@ -34,5 +35,7 @@ abstract class ConstructionStick(item: ItemStack) : SItem(item) {
             }
         }
     }
+    
+    
     
 }

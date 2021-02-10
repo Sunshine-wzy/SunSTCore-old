@@ -17,6 +17,8 @@ import org.bukkit.block.BlockFace.*
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.*
+import org.bukkit.material.MaterialData
+import org.bukkit.metadata.MetadataValue
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
@@ -105,7 +107,13 @@ fun Player.openInvWithSound(inv: Inventory, openSound: Sound, volume: Float, pit
  * 如果未满则直接添加到玩家背包
  * 否则以掉落物的形式生成到玩家附近
  */
-fun Player.giveItem(item: ItemStack) {
+fun Player.giveItem(item: ItemStack, amount: Int = 0) {
+    if(amount > 0){
+        if(amount < 64){
+            item.amount = amount
+        } else item.amount = 64
+    }
+    
     if(inventory.isFull()){
         player.world.dropItem(player.location, item)
     }
@@ -120,8 +128,8 @@ fun Player.giveItem(items: Array<ItemStack>) {
     }
 }
 
-fun Player.giveItem(item: Itemable) {
-    giveItem(item.getSItem())
+fun Player.giveItem(item: Itemable, amount: Int = 0) {
+    giveItem(item.getSItem(), amount)
 }
 
 /**
@@ -144,7 +152,7 @@ fun Player.completeTask(task: TaskBase, isCompleted: Boolean = true) {
 }
 
 /**
- * 使用特定前缀发送消息
+ * 发送消息 (使用 '&' 作为颜色符号)
  */
 fun Player.sendMsg(msg: String) {
     sendMessage(msg.replace('&', '§'))
@@ -341,5 +349,17 @@ fun BlockFace.transform(excludeFace: BlockFace): MutableList<BlockFace> {
 //region Location 位置
 
 fun Location.getFaceLocation(face: BlockFace): Location = clone().add(face.modX.toDouble(), face.modY.toDouble(), face.modZ.toDouble())
+
+fun Location.addClone(x: Int, y: Int, z: Int): Location =
+    clone().add(x.toDouble(), y.toDouble(), z.toDouble())
+
+fun Location.addClone(coord: Triple<Int, Int, Int>): Location =
+    clone().add(coord.first.toDouble(), coord.second.toDouble(), coord.third.toDouble())
+
+//endregion
+
+//region Material 材料
+
+fun MaterialData.getDurability(): Short = toItemStack(1).durability
 
 //endregion

@@ -1,8 +1,11 @@
 package io.github.sunshinewzy.sunstcore.listeners
 
+import io.github.sunshinewzy.sunstcore.events.SMachineAddEvent
+import io.github.sunshinewzy.sunstcore.events.SMachineRemoveEvent
 import io.github.sunshinewzy.sunstcore.utils.SEventSubscriber
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.*
 import org.bukkit.event.enchantment.EnchantItemEvent
@@ -21,11 +24,13 @@ import org.spigotmc.event.entity.EntityDismountEvent
 import org.spigotmc.event.entity.EntityMountEvent
 import org.spigotmc.event.player.PlayerSpawnLocationEvent
 
-object SEventSubscriberListener1 : Listener {
-    private fun <E: Event> call(e: E) {
+abstract class SEventSubscriberListener : Listener {
+    fun <E: Event> call(e: E) {
         SEventSubscriber.callSubscribeEvent(e)
     }
-    
+}
+
+object SEventSubscriberListener1 : SEventSubscriberListener() {
     
     //region PlayerEvent
     
@@ -83,7 +88,7 @@ object SEventSubscriberListener1 : Listener {
     @EventHandler
     fun onPlayerInteractEntity(e: PlayerInteractEntityEvent) { call(e) }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerInteract(e: PlayerInteractEvent) { call(e) }
 
     @EventHandler
@@ -239,10 +244,7 @@ object SEventSubscriberListener1 : Listener {
     
 }
 
-object SEventSubscriberListener2 : Listener {
-    private fun <E: Event> call(e: E) {
-        SEventSubscriber.callSubscribeEvent(e)
-    }
+object SEventSubscriberListener2 : SEventSubscriberListener() {
 
     //region EntityEvent
 
@@ -520,11 +522,7 @@ object SEventSubscriberListener2 : Listener {
     //endregion
 }
 
-object SEventSubscriberListener3 : Listener {
-    private fun <E: Event> call(e: E) {
-        SEventSubscriber.callSubscribeEvent(e)
-    }
-    
+object SEventSubscriberListener3 : SEventSubscriberListener() {
     
     //region AsyncPlayerPreLoginEvent
 
@@ -718,4 +716,22 @@ object SEventSubscriberListener3 : Listener {
     }
 
     //endregion
+}
+
+object SEventSubscriberListener4 : SEventSubscriberListener() {
+    
+    //region SMachineEvent
+    
+    @EventHandler
+    fun onSMachineAdd(e: SMachineAddEvent) {
+        call(e)
+    }
+    
+    @EventHandler
+    fun onSMachineRemove(e: SMachineRemoveEvent) {
+        call(e)
+    }
+    
+    //endregion
+    
 }

@@ -1,5 +1,6 @@
 package io.github.sunshinewzy.sunstcore.objects
 
+import io.github.sunshinewzy.sunstcore.utils.getDurability
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -19,6 +20,10 @@ class SBlock(val material: Material, val data: MaterialData) {
     
     constructor(loc: Location) : this(loc.block.type, loc.block.state.data)
     
+    constructor(block: Block) : this(block.type, block.state.data)
+    
+    constructor(blockState: BlockState) : this(blockState.type, blockState.data)
+    
     constructor(item: ItemStack) : this(item.type, item.data)
     
     
@@ -29,6 +34,7 @@ class SBlock(val material: Material, val data: MaterialData) {
         blockState.data = data
     }
     
+    
     fun isSimilar(block: BlockState): Boolean
         = if(material == block.type){
             data == block.data
@@ -38,9 +44,13 @@ class SBlock(val material: Material, val data: MaterialData) {
     
     fun isSimilar(loc: Location): Boolean = isSimilar(loc.block)
     
+    fun isSimilar(material: Material, durability: Short = 0): Boolean = material == this.material && durability == this.data.getDurability()
+    
+    
     fun hasName(): Boolean = name != ""
 
 
+    
     override fun equals(other: Any?): Boolean =
         when {
             other == null -> false
@@ -60,5 +70,11 @@ class SBlock(val material: Material, val data: MaterialData) {
     }
 
     override fun toString(): String = "SBlock{material=$material,data=$data}"
+    
+    
+    companion object {
+        fun Location.getSBlock(): SBlock = SBlock(this)
+        
+    }
     
 }

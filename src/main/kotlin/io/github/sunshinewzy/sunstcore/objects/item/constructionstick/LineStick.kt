@@ -1,6 +1,5 @@
 package io.github.sunshinewzy.sunstcore.objects.item.constructionstick
 
-import io.github.sunshinewzy.sunstcore.modules.machine.MachineStructure
 import io.github.sunshinewzy.sunstcore.utils.damageItemInOffHand
 import io.github.sunshinewzy.sunstcore.utils.getFaceLocation
 import io.github.sunshinewzy.sunstcore.utils.subscribeEvent

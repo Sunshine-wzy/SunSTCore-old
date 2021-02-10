@@ -3,16 +3,16 @@ package io.github.sunshinewzy.sunstcore
 import io.github.sunshinewzy.sunstcore.bstats.Metrics
 import io.github.sunshinewzy.sunstcore.listeners.*
 import io.github.sunshinewzy.sunstcore.modules.data.DataManager
+import io.github.sunshinewzy.sunstcore.modules.machine.MachineWrench
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.item.SunSTItem
 import io.github.sunshinewzy.sunstcore.utils.SReflect
-import io.github.sunshinewzy.sunstcore.utils.giveItem
+import io.github.sunshinewzy.sunstcore.utils.SunSTTestApi
 import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.PluginManager
@@ -58,9 +58,11 @@ class SunSTCore : JavaPlugin() {
 
 
     private fun init() {
-        DataManager.init()
         SItem.initAction()
+        DataManager.init()
         SReflect.init()
+        SunSTItem.init()
+        MachineWrench.init()
     }
     
     private fun registerListeners() {
@@ -68,6 +70,7 @@ class SunSTCore : JavaPlugin() {
             registerEvents(SEventSubscriberListener1, this@SunSTCore)
             registerEvents(SEventSubscriberListener2, this@SunSTCore)
             registerEvents(SEventSubscriberListener3, this@SunSTCore)
+            registerEvents(SEventSubscriberListener4, this@SunSTCore)
             
             registerEvents(BlockListener, this@SunSTCore)
         }
@@ -80,6 +83,7 @@ class SunSTCore : JavaPlugin() {
     }
     
     
+    @SunSTTestApi
     private fun test() {
         subscribeEvent<PlayerJoinEvent> {
             

@@ -36,18 +36,17 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test-junit"))
+    testCompileOnly(kotlin("test-junit"))
 
     implementation("com.google.code.gson:gson:2.8.2")
     implementation("org.scilab.forge:jlatexmath:1.0.7")
     implementation("io.netty:netty-all:4.1.48.Final")
 
     implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
 
     compileOnly(fileTree(mapOf("dir" to "cores", "include" to listOf("*.jar"))))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    
-    api("net.mamoe", "mirai-core", "2.3.2")
 }
 
 
@@ -62,6 +61,5 @@ tasks {
         archiveBaseName.set("SunSTCore")
         archiveVersion.set(project.version.toString())
         destinationDirectory.set(file("F:/Java/Debug/Spigot-1.12/plugins"))
-        
     }
 }

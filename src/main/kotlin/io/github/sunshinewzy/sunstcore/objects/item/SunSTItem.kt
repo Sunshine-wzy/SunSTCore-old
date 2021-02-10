@@ -1,6 +1,7 @@
 package io.github.sunshinewzy.sunstcore.objects.item
 
 import io.github.sunshinewzy.sunstcore.SunSTCore
+import io.github.sunshinewzy.sunstcore.interfaces.Initable
 import io.github.sunshinewzy.sunstcore.interfaces.Itemable
 import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.addRecipe
@@ -56,4 +57,8 @@ enum class SunSTItem(val item: ItemStack) : Itemable {
 
 
     override fun getSItem(): ItemStack = item
+
+    companion object : Initable {
+        override fun init() {}
+    }
 }
