@@ -6,11 +6,14 @@ import org.bukkit.event.HandlerList
 
 class SMachineRemoveEvent(sMachine: SMachine, val loc: Location) :SMachineEvent(sMachine) {
     
-    override fun getHandlers(): HandlerList = sHandlers
+    override fun getHandlers(): HandlerList = handlerList
     
     
     
     companion object {
-        private val sHandlers = HandlerList()
+        private val handlerList = HandlerList()
+        
+        @JvmStatic
+        fun getHandlerList(): HandlerList = handlerList
     }
 }

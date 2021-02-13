@@ -3,8 +3,11 @@ package io.github.sunshinewzy.sunstcore.modules.machine
 import io.github.sunshinewzy.sunstcore.SunSTCore
 import io.github.sunshinewzy.sunstcore.events.SMachineAddEvent
 import io.github.sunshinewzy.sunstcore.events.SMachineRemoveEvent
+import io.github.sunshinewzy.sunstcore.interfaces.Initable
+import io.github.sunshinewzy.sunstcore.modules.data.SMachineData
 import io.github.sunshinewzy.sunstcore.objects.SLocation
 import io.github.sunshinewzy.sunstcore.utils.SunSTTestApi
+import io.github.sunshinewzy.sunstcore.utils.removeClone
 import io.github.sunshinewzy.sunstcore.utils.sendMsg
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -16,7 +19,13 @@ import org.bukkit.entity.Player
  * @param wrench 构建该多方块机器的扳手
  * @param structure 该多方块机器的结构
  */
-abstract class SMachine(val name: String, val wrench: MachineWrench, val structure: MachineStructure) {
+abstract class SMachine(
+    val name: String,
+    val wrench: SMachineWrench,
+    val structure: SMachineStructure
+) : Initable {
+    val machineSLocations = HashSet<String>()
+    
     
     init {
         wrench.addMachine(this)
@@ -28,7 +37,7 @@ abstract class SMachine(val name: String, val wrench: MachineWrench, val structu
     
     
     fun judgeStructure(loc: Location): Boolean {
-        if(structure.judge(loc))
+        if(structure.judge(loc.removeClone(structure.center)))
             return specialJudge()
         
         return false
@@ -37,9 +46,13 @@ abstract class SMachine(val name: String, val wrench: MachineWrench, val structu
     open fun specialJudge(): Boolean = true
     
     
-    fun addMachine(loc: Location) {
+    fun addMachine(loc: Location, player: Player) {
         machines[SLocation(loc)] = this
-        SunSTCore.pluginManager.callEvent(SMachineAddEvent(this, loc))
+        SunSTCore.pluginManager.callEvent(SMachineAddEvent(this, loc, player))
+    }
+    
+    fun addMachine(sLocation: SLocation) {
+        machines[sLocation] = this
     }
     
     fun removeMachine(loc: Location) {
@@ -56,7 +69,11 @@ abstract class SMachine(val name: String, val wrench: MachineWrench, val structu
             }
         }
     }
-    
+
+    override fun init() {
+        SMachineData(this)
+    }
+
     @SunSTTestApi
     fun buildMachine(loc: Location) {
         var theLoc: Location
@@ -71,7 +88,8 @@ abstract class SMachine(val name: String, val wrench: MachineWrench, val structu
     
     companion object {
         private val machines = HashMap<SLocation, SMachine>()
-        
+
+
         fun Location.hasSMachine(): Boolean {
             val sLoc = SLocation(this)
             

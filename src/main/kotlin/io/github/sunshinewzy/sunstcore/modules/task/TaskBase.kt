@@ -1,38 +1,63 @@
 package io.github.sunshinewzy.sunstcore.modules.task
 
-import io.github.sunshinewzy.sunstcore.objects.SItem
+import io.github.sunshinewzy.sunstcore.interfaces.Itemable
+import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.setLore
 import io.github.sunshinewzy.sunstcore.objects.item.TaskGuideItem
 import io.github.sunshinewzy.sunstcore.objects.orderWith
-import io.github.sunshinewzy.sunstcore.utils.completeTask
-import io.github.sunshinewzy.sunstcore.utils.createEdge
-import io.github.sunshinewzy.sunstcore.utils.giveItem
-import io.github.sunshinewzy.sunstcore.utils.sendMsg
+import io.github.sunshinewzy.sunstcore.utils.*
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.configuration.serialization.ConfigurationSerializable
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 abstract class TaskBase(
     val taskStage: TaskStage,
     val taskName: String,
-    var order: Int,
-    var predecessor: TaskBase?,
+    val order: Int,
+    val predecessor: TaskBase?,
     private val symbol: ItemStack,
-    var reward: Array<ItemStack>,
-    var openSound: Sound = taskStage.openSound,
-    var volume: Float = taskStage.volume,
-    var pitch: Float = taskStage.pitch,
-    var invSize: Int = 5
+    val reward: Array<ItemStack>,
+    val invSize: Int = 5,
+    vararg descriptionLore: String
 ): ConfigurationSerializable, TaskInventory {
     protected val holder = TaskInventoryHolder(this)
     
     private val slotItems = HashMap<Int, ItemStack>()
+    private var submitItemOrder = -1
+    private var backItemOrder = -1
+
+    var openSound = taskStage.openSound
+    var volume = taskStage.volume
+    var pitch = taskStage.pitch
+    var submitItem = TaskGuideItem.SUBMIT.item.setLore(*descriptionLore)
+    
     
     init {
         taskStage.taskMap[taskName] = this
+        
+        subscribeEvent<InventoryClickEvent> { 
+            val player = view.getSPlayer()
+            
+            if(inventory.holder == this@TaskBase.holder){
+                when(slot) {
+                    submitItemOrder -> {
+                        if(!player.hasCompleteTask(this@TaskBase)){
+                            submit(player)
+                        } else againSubmitTask(player)
+                    }
+                    
+                    backItemOrder -> {
+                        taskStage.openTaskInv(player)
+                    }
+                }
+                
+                clickInventory(this)
+            }
+        }
+        
     }
     
     
@@ -42,7 +67,7 @@ abstract class TaskBase(
         map["taskStage"] = taskStage.stageName
         map["taskName"] = taskName
         map["order"] = order
-        map["predecessor"] = if(predecessor != null) predecessor!!.taskName else "null"
+        map["predecessor"] = predecessor?.taskName ?: "null"
         map["symbol"] = symbol
         map["reward"] = reward
         map["openSound"] = openSound
@@ -56,7 +81,9 @@ abstract class TaskBase(
     
     
     override fun openTaskInv(p: Player, inv: Inventory) {
-        p.world.playSound(p.location, openSound, volume, pitch)
+        taskStage.taskProject.lastTaskInv[p.uniqueId] = this
+        
+        p.playSound(p.location, openSound, volume, pitch)
         p.openInventory(inv)
     }
     
@@ -72,6 +99,11 @@ abstract class TaskBase(
     }
     
     
+    abstract fun clickInventory(e: InventoryClickEvent)
+    
+    abstract fun submit(player: Player)
+    
+    
     fun getSymbol(): ItemStack = symbol.clone()
     
     fun setSlotItem(order: Int, item: ItemStack): Boolean {
@@ -81,23 +113,36 @@ abstract class TaskBase(
         return true
     }
     
+    fun setSlotItem(order: Int, item: Itemable): Boolean = setSlotItem(order, item.getSItem())
+    
     fun setSlotItem(x: Int, y: Int, item: ItemStack): Boolean = setSlotItem(x orderWith y, item)
 
-    fun setSlotItem(x: Int, y: Int, item: TaskGuideItem): Boolean = setSlotItem(x orderWith y, item.item)
+    fun setSlotItem(x: Int, y: Int, item: Itemable): Boolean = setSlotItem(x orderWith y, item.getSItem())
 
+    fun setSubmitItemOrder(x: Int, y: Int) {
+        submitItemOrder = x orderWith y
+        setSlotItem(submitItemOrder, submitItem)
+    }
+    
+    fun setBackItemOrder(x: Int, y: Int) {
+        backItemOrder = x orderWith y
+        setSlotItem(backItemOrder, TaskGuideItem.BACK)
+    }
+    
+    
     fun hasPredecessor(): Boolean = predecessor != null
 
-    fun againSubmitTask(player: Player) {
-        player.world.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 0.8f)
+    open fun againSubmitTask(player: Player) {
+        player.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 0.8f)
         player.sendMsg("&c您已完成过任务 &f[&a$taskName&f]&c 了，不能重复提交！")
     }
     
-    fun requireNotEnough(player: Player) {
-        player.world.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1.2f)
-        player.sendMsg("&c你的背包中没有所需物品！")
+    open fun requireNotEnough(player: Player) {
+        player.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1.2f)
+        player.sendMsg("&c您的背包中没有所需物品！")
     }
     
-    fun completeTask(player: Player) {
+    open fun completeTask(player: Player) {
         player.completeTask(this)
         player.giveItem(reward)
         player.world.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 0.2f)
@@ -106,14 +151,4 @@ abstract class TaskBase(
     }
 
     
-    companion object {
-        fun SItem.Companion.createTaskSymbol(type: Material, firstLore: String = "§a>点我查看任务<", vararg lore: String = arrayOf()): SItem {
-            val loreList = ArrayList<String>()
-            loreList.add(firstLore)
-            if(lore.isNotEmpty())
-                loreList.addAll(lore)
-
-            return SItem(type, loreList)
-        }
-    }
 }

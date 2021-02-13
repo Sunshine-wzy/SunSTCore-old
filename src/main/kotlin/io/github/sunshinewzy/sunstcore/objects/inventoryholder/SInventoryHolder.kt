@@ -37,6 +37,7 @@ open class SInventoryHolder<T>(var data: T) : InventoryHolder {
     }
 
     override fun equals(other: Any?): Boolean {
+        if(other == null) return false
         if (this === other) return true
         if (other !is SInventoryHolder<*>) return false
 

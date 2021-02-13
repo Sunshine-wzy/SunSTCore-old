@@ -11,6 +11,8 @@ import org.bukkit.material.MaterialData
 class SBlock(val material: Material, val data: MaterialData) {
     var name = ""
     
+    private var displayItem: ItemStack = SItem(material, data.getDurability(), 1)
+    
     
     constructor(material: Material, durability: Byte = 0) : this(material, MaterialData(material, durability))
     
@@ -34,10 +36,11 @@ class SBlock(val material: Material, val data: MaterialData) {
         blockState.data = data
     }
     
+    fun toItem(): ItemStack = SItem(material, data.getDurability(), 1)
     
     fun isSimilar(block: BlockState): Boolean
         = if(material == block.type){
-            data == block.data
+            data.getDurability() == block.data.getDurability()
         } else false
     
     fun isSimilar(block: Block): Boolean = isSimilar(block.state)
@@ -48,6 +51,13 @@ class SBlock(val material: Material, val data: MaterialData) {
     
     
     fun hasName(): Boolean = name != ""
+    
+    fun setDisplayItem(item: ItemStack): SBlock {
+        displayItem = item
+        return this
+    }
+    
+    fun getDisplayItem(): ItemStack = displayItem
 
 
     
@@ -58,7 +68,7 @@ class SBlock(val material: Material, val data: MaterialData) {
             other !is SBlock -> false
             
             else -> if(name != other.name) false
-            else material == other.material && data == other.data
+            else material == other.material && data.getDurability() == other.data.getDurability()
         }
 
     override fun hashCode(): Int {

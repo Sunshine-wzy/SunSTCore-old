@@ -4,7 +4,6 @@ import io.github.sunshinewzy.sunstcore.exceptions.NoRecipeException
 import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.modules.task.TaskInventoryHolder
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
-import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.isItemSimilar
 import io.github.sunshinewzy.sunstcore.objects.item.TaskGuideItem
 import io.github.sunshinewzy.sunstcore.objects.orderWith
@@ -13,7 +12,7 @@ import io.github.sunshinewzy.sunstcore.objects.toY
 import io.github.sunshinewzy.sunstcore.utils.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.Sound
+import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -29,16 +28,13 @@ class ItemCraftTask(
     reward: Array<ItemStack>,
     val craftItem: ItemStack,
     vararg descriptionLore: String,
-    openSound: Sound = taskStage.openSound,
-    volume: Float = taskStage.volume,
-    pitch: Float = taskStage.pitch
-) : TaskBase(taskStage, taskName, order, predecessor, symbol, reward, openSound, volume, pitch, 5) {
+) : TaskBase(taskStage, taskName, order, predecessor, symbol, reward, 5, *descriptionLore) {
     private var hasMultiPages = false
     private val pages = ArrayList<Array<ItemStack>>()
     
     
     init {
-        setSlotItem(8, 2, SItem(TaskGuideItem.SUBMIT.item, descriptionLore.toList()))
+        setSlotItem(8, 2, submitItem)
         setSlotItem(8, 4, TaskGuideItem.BACK)
         setSlotItem(6, 3, craftItem)
         
@@ -156,6 +152,14 @@ class ItemCraftTask(
         }
     }
 
+
+    override fun clickInventory(e: InventoryClickEvent) {
+        
+    }
+
+    override fun submit(player: Player) {
+        
+    }
 
     private fun setCraftSlotItem(craftOrder: Int, item: ItemStack) {
         setSlotItem(1 + craftOrder.toX(3), 1 + craftOrder.toY(3), item)

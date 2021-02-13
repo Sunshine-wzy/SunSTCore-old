@@ -1,11 +1,14 @@
 package io.github.sunshinewzy.sunstcore.objects
 
+import io.github.sunshinewzy.sunstcore.interfaces.Itemable
 import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
+import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -88,6 +91,15 @@ open class SItem(item: ItemStack) : ItemStack(item) {
         private val itemActions = HashMap<SItem, ArrayList<PlayerInteractEvent.() -> Unit>>()
         
         
+        fun createTaskSymbol(type: Material, damage: Short, vararg lore: String = arrayOf()): SItem {
+            val loreList = arrayListOf("§a>点我查看任务<")
+            if(lore.isNotEmpty())
+                loreList.addAll(lore)
+
+            return SItem(type, damage, 1, "", *lore)
+        }
+        
+        
         internal fun initAction() {
             subscribeEvent<PlayerInteractEvent> { 
                 if(item == null || item.type == Material.AIR) return@subscribeEvent
@@ -149,6 +161,9 @@ open class SItem(item: ItemStack) : ItemStack(item) {
             } else !item.hasItemMeta()
         }
         
+        fun ItemStack.isItemSimilar(item: Itemable, checkLore: Boolean = true, checkAmount: Boolean = true, checkDurability: Boolean = false): Boolean =
+            isItemSimilar(item.getSItem(), checkLore, checkAmount, checkDurability)
+        
         fun ItemStack.addRecipe(plugin: JavaPlugin, recipe: Recipe): ItemStack {
             plugin.server.addRecipe(recipe)
             return this
@@ -159,6 +174,61 @@ open class SItem(item: ItemStack) : ItemStack(item) {
                 plugin.server.addRecipe(it)
             }
             
+            return this
+        }
+        
+        fun ItemStack.addShapedRecipe(
+            plugin: JavaPlugin,
+            key: String,
+            ingredient: Map<Char, Material>,
+            line1: String = "",
+            line2: String = "",
+            line3: String = ""
+        ): ItemStack {
+            addRecipe(
+                plugin,
+                SShapedRecipe(
+                    NamespacedKey(plugin, key),
+                    this,
+                    ingredient,
+                    line1,
+                    line2,
+                    line3
+                )
+            )
+            return this
+        }
+        
+        fun ItemStack.addShapelessRecipe(
+            plugin: JavaPlugin,
+            key: String,
+            ingredients: List<Pair<Int, Material>>
+        ): ItemStack {
+            val recipe = ShapelessRecipe(
+                NamespacedKey(plugin, key),
+                this
+            )
+            ingredients.forEach { 
+                recipe.addIngredient(it.first, it.second)
+            }
+            
+            addRecipe(plugin, recipe)
+            return this
+        }
+        
+        fun ItemStack.addShapelessRecipe(
+            plugin: JavaPlugin,
+            key: String,
+            count: Int,
+            ingredient: Material
+        ): ItemStack {
+            addRecipe(
+                plugin,
+                ShapelessRecipe(
+                    NamespacedKey(plugin, key),
+                    this
+                ).addIngredient(count, ingredient)
+            )
             return this
         }
         

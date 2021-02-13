@@ -13,3 +13,7 @@ fun Int.toCoordinate(): Pair<Int, Int> = (this%9 + 1) to (this/9 + 1)
 fun Int.toX(length: Int): Int = this % length + 1
 
 fun Int.toY(length: Int): Int = this / length + 1
+
+
+fun Triple<Int, Int, Int>.add(x: Int, y: Int, z: Int): Triple<Int, Int, Int> =
+    Triple(first + x, second + y, third + z)

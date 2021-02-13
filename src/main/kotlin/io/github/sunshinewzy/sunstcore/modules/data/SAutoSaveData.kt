@@ -18,9 +18,9 @@ abstract class SAutoSaveData(
     private val plugin: JavaPlugin,
     val name: String,
     val path: String = "",
-    val saveTime: Long = 600_000
+    val saveTime: Long = 12_000
 ) {
-    private val file = File(
+    protected val file = File(
         plugin.dataFolder,
         if (path == "") "data/$name.yml"
         else "${path.replace("\\", "/")}/$name.yml"
@@ -36,6 +36,11 @@ abstract class SAutoSaveData(
     )
     
     init {
+        DataManager.allAutoSaveData.add(this)
+        
+        Bukkit.getScheduler().runTaskLater(SunSTCore.getPlugin(), {
+            load()
+        }, 1)
         Bukkit.getScheduler().runTaskTimer(SunSTCore.getPlugin(), {
             save()
         }, saveTime, saveTime)
@@ -75,7 +80,6 @@ abstract class SAutoSaveData(
     }
     
     
-    private fun getConfig(): YamlConfiguration {
-        return YamlConfiguration.loadConfiguration(file)
-    }
+    private fun getConfig(): YamlConfiguration = YamlConfiguration.loadConfiguration(file)
+    
 }

@@ -15,24 +15,30 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import java.util.*
+import kotlin.collections.HashMap
 
 class TaskProject(
     val projectName: String,
     val openItem: ItemStack = SItem(Material.ENCHANTED_BOOK, "§e$projectName §a向导"),
     val isFirstJoinGive: Boolean = true,
-    var title: String,
-    var edgeItem: ItemStack = SItem(Material.STAINED_GLASS_PANE),
-    var openSound: Sound = Sound.ENTITY_HORSE_ARMOR,
-    var volume: Float = 1f,
-    var pitch: Float = 1.2f,
-    var invSize: Int = 5
+    val title: String,
+    val edgeItem: ItemStack = SItem(Material.STAINED_GLASS_PANE),
+    val openSound: Sound = Sound.ENTITY_HORSE_ARMOR,
+    val volume: Float = 1f,
+    val pitch: Float = 1.2f,
+    val invSize: Int = 5
 ) : TaskInventory {
     private val holder = SProtectInventoryHolder(projectName)
+    
     val stageMap = HashMap<String, TaskStage>()
+    val lastTaskInv = HashMap<UUID, TaskInventory>()
     
     init {
         DataManager.sTaskData[projectName] = STaskData(this)
@@ -43,9 +49,21 @@ class TaskProject(
         subscribeEvent<PlayerInteractEvent> {
             if(item == null) return@subscribeEvent
 
-            if(item.isItemSimilar(openItem)){
-                isCancelled = true
-                openTaskInv(player)
+            if(hand == EquipmentSlot.HAND && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)){
+                if(item.isItemSimilar(openItem)){
+                    isCancelled = true
+                    
+                    val uuid = player.uniqueId
+                    if(lastTaskInv.containsKey(uuid)){
+                        val lastInv = lastTaskInv[uuid]
+                        if(lastInv != null){
+                            lastInv.openTaskInv(player)
+                            return@subscribeEvent
+                        }
+                    }
+                    
+                    openTaskInv(player)
+                }
             }
         }
         
@@ -63,7 +81,9 @@ class TaskProject(
 
 
     override fun openTaskInv(p: Player, inv: Inventory) {
-        p.world.playSound(p.location, openSound, volume, pitch)
+        lastTaskInv[p.uniqueId] = this
+        
+        p.playSound(p.location, openSound, volume, pitch)
         p.openInventory(inv)
     }
     

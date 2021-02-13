@@ -5,8 +5,8 @@ package io.github.sunshinewzy.sunstcore.modules.machine
  */
 abstract class MachineManual(
     name: String,
-    wrench: MachineWrench,
-    structure: MachineStructure
+    wrench: SMachineWrench,
+    structure: SMachineStructure
 ) : SMachine(name, wrench, structure) {
 
     override fun runMachine(event: SMachineRunEvent) {

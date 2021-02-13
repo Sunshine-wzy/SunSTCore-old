@@ -3,7 +3,7 @@ package io.github.sunshinewzy.sunstcore
 import io.github.sunshinewzy.sunstcore.bstats.Metrics
 import io.github.sunshinewzy.sunstcore.listeners.*
 import io.github.sunshinewzy.sunstcore.modules.data.DataManager
-import io.github.sunshinewzy.sunstcore.modules.machine.MachineWrench
+import io.github.sunshinewzy.sunstcore.modules.machine.SMachineWrench
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.item.SunSTItem
@@ -62,7 +62,8 @@ class SunSTCore : JavaPlugin() {
         DataManager.init()
         SReflect.init()
         SunSTItem.init()
-        MachineWrench.init()
+        SMachineWrench.init()
+        
     }
     
     private fun registerListeners() {

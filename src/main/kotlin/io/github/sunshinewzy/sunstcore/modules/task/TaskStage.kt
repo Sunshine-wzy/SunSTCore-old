@@ -18,14 +18,14 @@ import org.bukkit.inventory.ItemStack
 class TaskStage(
     val taskProject: TaskProject,
     val stageName: String,
-    var order: Int,
-    var predecessor: TaskStage?,
-    var symbol: ItemStack,
-    var edgeItem: ItemStack = SItem(Material.STAINED_GLASS_PANE),
-    var openSound: Sound = Sound.ENTITY_HORSE_ARMOR,
-    var volume: Float = 1f,
-    var pitch: Float = 1.2f,
-    var invSize: Int = 5
+    val order: Int,
+    val predecessor: TaskStage?,
+    val symbol: ItemStack,
+    val edgeItem: ItemStack = SItem(Material.STAINED_GLASS_PANE),
+    val openSound: Sound = Sound.ENTITY_HORSE_ARMOR,
+    val volume: Float = 1f,
+    val pitch: Float = 1.2f,
+    val invSize: Int = 5
 ): TaskInventory {
     private val holder = SProtectInventoryHolder(
         Pair(taskProject.projectName, stageName)
@@ -56,7 +56,9 @@ class TaskStage(
     }
 
     override fun openTaskInv(p: Player, inv: Inventory) {
-        p.world.playSound(p.location, openSound, volume, pitch)
+        taskProject.lastTaskInv[p.uniqueId] = this
+        
+        p.playSound(p.location, openSound, volume, pitch)
         p.openInventory(inv)
     }
 

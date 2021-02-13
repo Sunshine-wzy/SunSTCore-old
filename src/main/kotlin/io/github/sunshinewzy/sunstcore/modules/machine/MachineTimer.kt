@@ -8,8 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin
  */
 abstract class MachineTimer(
     name: String,
-    wrench: MachineWrench,
-    structure: MachineStructure,
+    wrench: SMachineWrench,
+    structure: SMachineStructure,
     val plugin: JavaPlugin,
     private val period: Long,
 ) : SMachine(name, wrench, structure) {

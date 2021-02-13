@@ -14,6 +14,7 @@ import java.io.File
 object DataManager : Initable {
     private val dir = SunSTCore.getPlugin().dataFolder
     
+    val allAutoSaveData = ArrayList<SAutoSaveData>()
     val sPlayerData = HashMap<String, SunSTPlayerData>()
     val sTaskData = HashMap<String, STaskData>()
     
@@ -41,9 +42,13 @@ object DataManager : Initable {
     }
     
     fun saveData() {
-        sPlayerData.values.forEach { 
+        allAutoSaveData.forEach { 
             it.save()
         }
+        
+//        sPlayerData.values.forEach { 
+//            it.save()
+//        }
     }
     
     private fun loadFolderData(

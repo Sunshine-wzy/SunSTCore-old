@@ -8,6 +8,7 @@ import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.isItemSimilar
+import io.github.sunshinewzy.sunstcore.objects.SMetadataValue
 import io.github.sunshinewzy.sunstcore.objects.orderWith
 import io.github.sunshinewzy.sunstcore.utils.SReflect.damage
 import org.bukkit.*
@@ -18,7 +19,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.*
 import org.bukkit.material.MaterialData
-import org.bukkit.metadata.MetadataValue
+import org.bukkit.metadata.MetadataValueAdapter
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 
@@ -98,7 +99,7 @@ fun Player.hasCompleteStage(stage: TaskStage?): Boolean {
 //region Player 玩家
 
 fun Player.openInvWithSound(inv: Inventory, openSound: Sound, volume: Float, pitch: Float) {
-    world.playSound(location, openSound, volume, pitch)
+    playSound(location, openSound, volume, pitch)
     openInventory(inv)
 }
 
@@ -156,6 +157,10 @@ fun Player.completeTask(task: TaskBase, isCompleted: Boolean = true) {
  */
 fun Player.sendMsg(msg: String) {
     sendMessage(msg.replace('&', '§'))
+}
+
+fun Player.sendMsg(prefix: String, msg: String) {
+    sendMessage("&f[$prefix&f] ".replace('&', '§') + msg.replace('&', '§'))
 }
 
 /**
@@ -329,6 +334,22 @@ fun Block.getDurability() = state.data.toItemStack(1).durability
 
 fun Block.getFaceLocation(face: BlockFace): Location = location.getFaceLocation(face)
 
+fun Block.getSMetadata(plugin: JavaPlugin, key: String): SMetadataValue {
+    var meta = SMetadataValue(plugin, 0)
+    if(hasMetadata(key)) {
+        for(metadata in getMetadata(key)){
+            if(metadata is SMetadataValue){
+                meta = metadata
+                break
+            }
+        }
+    }
+    return meta
+}
+
+fun Block.getSMetadataInt(plugin: JavaPlugin, key: String): Int = getSMetadata(plugin, key).asInt()
+
+
 fun BlockFace.transform(): MutableList<BlockFace> =
     when(this) {
         NORTH, SOUTH -> arrayListOf(EAST, WEST, UP, DOWN)
@@ -356,10 +377,38 @@ fun Location.addClone(x: Int, y: Int, z: Int): Location =
 fun Location.addClone(coord: Triple<Int, Int, Int>): Location =
     clone().add(coord.first.toDouble(), coord.second.toDouble(), coord.third.toDouble())
 
+fun Location.addClone(y: Int): Location =
+    addClone(0, y, 0)
+
+fun Location.removeClone(x: Int, y: Int, z: Int): Location =
+    clone().add(-x.toDouble(), -y.toDouble(), -z.toDouble())
+
+fun Location.removeClone(coord: Triple<Int, Int, Int>): Location =
+    clone().add(-coord.first.toDouble(), -coord.second.toDouble(), -coord.third.toDouble())
+
+fun Location.removeClone(y: Int): Location =
+    removeClone(0, y, 0)
+
 //endregion
 
 //region Material 材料
 
 fun MaterialData.getDurability(): Short = toItemStack(1).durability
+
+//endregion
+
+//region Metadata 自定义元数据
+
+inline fun <reified F, reified S> MetadataValueAdapter.asPair(default: Pair<F, S>): Pair<F, S> {
+    val obj = value()
+    if(obj is Pair<*, *>){
+        val (first, second) = obj
+        if(first is F && second is S){
+            return first to second
+        }
+    }
+    
+    return default
+}
 
 //endregion

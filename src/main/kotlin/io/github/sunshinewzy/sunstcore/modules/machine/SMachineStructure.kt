@@ -4,8 +4,10 @@ import io.github.sunshinewzy.sunstcore.exceptions.MachineStructureException
 import io.github.sunshinewzy.sunstcore.exceptions.NoIngredientException
 import io.github.sunshinewzy.sunstcore.objects.SBlock
 import io.github.sunshinewzy.sunstcore.utils.addClone
+import io.github.sunshinewzy.sunstcore.utils.setItem
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.inventory.Inventory
 
 /**
  * 机器结构
@@ -14,7 +16,7 @@ import org.bukkit.Material
  * @param ingredients [shape] 中每个字符指代的方块 [SBlock] (推荐使用 mapOf('x' to SBlock(Material.XXX), 'y' to SBlock(Material.XXX)) 的形式构造)
  * @param center 机器构造(和使用)的中心坐标, 请确保该坐标对应的方块不为空气
  */
-abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SBlock>, val center: Triple<Int, Int, Int>) {
+abstract class SMachineStructure(val size: SMachineSize, val shape: String, val ingredients: Map<Char, SBlock>, val center: Triple<Int, Int, Int>) {
     val structure = HashMap<Triple<Int, Int, Int>, SBlock>()
     val centerBlock: SBlock
     
@@ -25,18 +27,18 @@ abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SB
         centerBlock = if(structure.containsKey(center)){
             val theCenterBlock = structure[center] ?: throw MachineStructureException(
                 shape,
-                "The center doesn't have a block"
+                "The center is not a block"
             )
 
             if(theCenterBlock.material == Material.AIR) throw  MachineStructureException(
                 shape,
-                "The center block cannot be AIR"
+                "The center block cannot be AIR."
             )
             theCenterBlock
         }
         else throw MachineStructureException(
             shape,
-            "The center doesn't have a block"
+            "The center is not a block."
         )
     }
 
@@ -63,16 +65,17 @@ abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SB
      * """
      */
     class CentralSymmetry(
+        size: SMachineSize,
         shape: String,
         ingredients: Map<Char, SBlock>,
         center: Triple<Int, Int, Int>
-    ) : MachineStructure(shape, ingredients, center) {
+    ) : SMachineStructure(size, shape, ingredients, center) {
         
         override fun specialStructure(x: Int, y: Int, z: Int, sBlock: SBlock) {
             if(z == 0){
                 if(x > 0) throw MachineStructureException(
                     shape,
-                    "The first line of CentralSymmetry's layer is the central block, which cannot have more than one char"
+                    "The first line of CentralSymmetry's layer is the central block, which cannot have more than one char."
                 )
                 
                 structure[Triple(0, y, 0)] = sBlock
@@ -89,7 +92,8 @@ abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SB
             var theLoc: Location
             structure.forEach { (coord, sBlock) -> 
                 theLoc = loc.addClone(coord)
-                if(!sBlock.isSimilar(theLoc)) return false
+                if(!sBlock.isSimilar(theLoc))
+                    return false
             }
             
             return true
@@ -100,10 +104,11 @@ abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SB
      * 特定朝向
      */
     class Orientation(
+        size: SMachineSize,
         shape: String,
         ingredients: Map<Char, SBlock>,
         center: Triple<Int, Int, Int>
-    ) : MachineStructure(shape, ingredients, center) {
+    ) : SMachineStructure(size, shape, ingredients, center) {
         
         override fun specialStructure(x: Int, y: Int, z: Int, sBlock: SBlock) {
             
@@ -115,16 +120,38 @@ abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SB
         }
     }
 
+    
+    fun displayInInventory(inv: Inventory, layer: Int) {
+        structure.forEach { (coord, sBlock) -> 
+            val (x, y, z) = coord
+            if(y != layer - 1) return@forEach
+            
+            when(size) {
+                SMachineSize.SIZE3 -> {
+                    if(size.isCoordInSize(coord))
+                        inv.setItem(invBaseX + x, invBaseY + z, sBlock.getDisplayItem())
+                }
+                
+                SMachineSize.SIZE5 -> {
+                    if(size.isCoordInSize(coord))
+                        inv.setItem(invBaseX + x, invBaseY + z, sBlock.getDisplayItem())
+                }
+            }
+        }
+    }
+    
 
     private fun shapeStructure() {
         val layers = shape.split("\n\n")
         
-        layers.forEachIndexed { y, layer ->
+        layers.forEachIndexed forEachY@{ y, layer ->
             
             val lines = layer.split("\n")
-            lines.forEachIndexed { z, line ->
+            lines.forEachIndexed forEachZ@{ z, line ->
                 
-                line.forEachIndexed { x, char ->
+                line.forEachIndexed forEachX@{ x, char ->
+                    if(char == ' ') return@forEachX
+                    
                     if(ingredients.containsKey(char)){
                         val sBlock = ingredients[char] ?: throw NoIngredientException(shape, char)
                         
@@ -136,6 +163,12 @@ abstract class MachineStructure(val shape: String, val ingredients: Map<Char, SB
             }
             
         }
+    }
+    
+    
+    companion object {
+        const val invBaseX = 5
+        const val invBaseY = 3
     }
     
 }
