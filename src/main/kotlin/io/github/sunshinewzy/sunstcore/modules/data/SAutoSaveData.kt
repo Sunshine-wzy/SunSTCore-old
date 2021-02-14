@@ -1,6 +1,7 @@
 package io.github.sunshinewzy.sunstcore.modules.data
 
 import io.github.sunshinewzy.sunstcore.SunSTCore
+import io.github.sunshinewzy.sunstcore.interfaces.Initable
 import io.github.sunshinewzy.sunstcore.utils.getDataPath
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
@@ -19,14 +20,12 @@ abstract class SAutoSaveData(
     val name: String,
     val path: String = "",
     val saveTime: Long = 12_000
-) {
+) : Initable {
     protected val file = File(
         plugin.dataFolder,
         if (path == "") "data/$name.yml"
         else "${path.replace("\\", "/")}/$name.yml"
     )
-    
-    val dataMap = HashMap<String, Any>()
     
     
     constructor(plugin: JavaPlugin, name: String, file: File): this(
@@ -38,14 +37,23 @@ abstract class SAutoSaveData(
     init {
         DataManager.allAutoSaveData.add(this)
         
-        Bukkit.getScheduler().runTaskLater(SunSTCore.getPlugin(), {
-            load()
-        }, 1)
+        if(file.exists()){
+            Bukkit.getScheduler().runTaskLater(SunSTCore.getPlugin(), {
+                load()
+            }, 1)
+        } else create()
+        
         Bukkit.getScheduler().runTaskTimer(SunSTCore.getPlugin(), {
             save()
         }, saveTime, saveTime)
     }
 
+
+    /**
+     * 创建文件时调用
+     */
+    abstract fun YamlConfiguration.createConfig()
+    
     /**
      * 保存文件前调用
      */
@@ -55,15 +63,28 @@ abstract class SAutoSaveData(
      * 加载文件后调用
      */
     abstract fun YamlConfiguration.loadConfig()
-    
-    
+
+
+    /**
+     * 创建配置文件
+     */
+    private fun create() {
+        val config = getConfig()
+        config.createConfig()
+
+        try {
+            config.save(file)
+        } catch (ex: IOException){
+            ex.printStackTrace()
+        }
+    }
+
+    /**
+     * 保存配置文件
+     */
     fun save() {
         val config = getConfig()
         config.modifyConfig()
-        
-        dataMap.forEach { (key, value) ->
-            config.set(key, value)
-        }
         
         try {
             config.save(file)
@@ -78,8 +99,12 @@ abstract class SAutoSaveData(
     fun load() {
         getConfig().loadConfig()
     }
-    
-    
+
+
+    override fun init() {
+        
+    }
+
     private fun getConfig(): YamlConfiguration = YamlConfiguration.loadConfiguration(file)
     
 }

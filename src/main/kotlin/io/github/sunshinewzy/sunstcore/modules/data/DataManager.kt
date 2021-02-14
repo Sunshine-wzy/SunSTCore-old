@@ -3,6 +3,8 @@ package io.github.sunshinewzy.sunstcore.modules.data
 import io.github.sunshinewzy.sunstcore.SunSTCore
 import io.github.sunshinewzy.sunstcore.interfaces.Initable
 import io.github.sunshinewzy.sunstcore.modules.data.sunst.SunSTPlayerData
+import io.github.sunshinewzy.sunstcore.objects.item.constructionstick.LineStickData
+import io.github.sunshinewzy.sunstcore.objects.item.constructionstick.RangeStickData
 import io.github.sunshinewzy.sunstcore.utils.giveItem
 import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import org.bukkit.configuration.file.YamlConfiguration
@@ -13,8 +15,10 @@ import java.io.File
 
 object DataManager : Initable {
     private val dir = SunSTCore.getPlugin().dataFolder
+    private val allReloadData = ArrayList<SAutoSaveData>()
     
     val allAutoSaveData = ArrayList<SAutoSaveData>()
+    
     val sPlayerData = HashMap<String, SunSTPlayerData>()
     val sTaskData = HashMap<String, STaskData>()
     
@@ -39,6 +43,9 @@ object DataManager : Initable {
                 }
             }
         }
+
+        LineStickData.init()
+        RangeStickData.init()
     }
     
     fun saveData() {
@@ -49,6 +56,17 @@ object DataManager : Initable {
 //        sPlayerData.values.forEach { 
 //            it.save()
 //        }
+    }
+    
+    fun reloadData() {
+        allReloadData.forEach { 
+            it.save()
+            it.load()
+        }
+    }
+    
+    fun addReloadData(data: SAutoSaveData) {
+        allReloadData.add(data)
     }
     
     private fun loadFolderData(

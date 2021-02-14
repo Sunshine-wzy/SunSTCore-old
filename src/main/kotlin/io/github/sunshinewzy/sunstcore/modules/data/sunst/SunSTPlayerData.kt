@@ -23,8 +23,12 @@ class SunSTPlayerData : SPlayerData {
     
     val taskProgress = HashMap<String, TaskProgress>()
     val isFirstJoinGive = HashMap<String, Boolean>()
-    
-    
+
+
+    override fun YamlConfiguration.createConfig() {
+        
+    }
+
     override fun YamlConfiguration.modifyConfig() {
         set("taskProgress", taskProgress)
         set("isFirstJoinGive", isFirstJoinGive)

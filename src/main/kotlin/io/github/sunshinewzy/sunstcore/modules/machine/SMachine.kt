@@ -29,7 +29,8 @@ abstract class SMachine(
     
     init {
         wrench.addMachine(this)
-        
+
+        SMachineData(this)
     }
     
     
@@ -71,7 +72,7 @@ abstract class SMachine(
     }
 
     override fun init() {
-        SMachineData(this)
+        
     }
 
     @SunSTTestApi

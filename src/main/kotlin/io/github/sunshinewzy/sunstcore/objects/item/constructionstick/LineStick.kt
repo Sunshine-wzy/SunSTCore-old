@@ -10,6 +10,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.NumberConversions
 
 /**
  * 直线型建筑手杖
@@ -20,6 +21,9 @@ class LineStick(item: ItemStack, val length: Int) : ConstructionStick(item) {
     init {
         sticks.add(this)
     }
+    
+    constructor(map: Map<String, Any>) : this(deserialize(map), NumberConversions.toInt(map["length"]))
+    
     
     override fun checkFirstRun() {
         if(sticks.isEmpty()){
@@ -49,6 +53,7 @@ class LineStick(item: ItemStack, val length: Int) : ConstructionStick(item) {
                                         }
                                     }
 
+                                    isCancelled = true
                                 }
                             }
                             
@@ -58,10 +63,16 @@ class LineStick(item: ItemStack, val length: Int) : ConstructionStick(item) {
             }
         }
     }
-    
-    
+
+    override fun serialize(): MutableMap<String, Any> {
+        val map = super.serialize()
+        map["length"] = length
+        return map
+    }
+
     companion object {
         private val sticks = ArrayList<LineStick>()
+        
     }
     
 }

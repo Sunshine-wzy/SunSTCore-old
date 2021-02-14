@@ -6,7 +6,11 @@ import io.github.sunshinewzy.sunstcore.objects.SLocation
 import org.bukkit.configuration.file.YamlConfiguration
 
 class SMachineData(val sMachine: SMachine) : SAutoSaveData(sMachine.wrench.plugin, sMachine.name, "SMachine") {
-    
+
+    override fun YamlConfiguration.createConfig() {
+        
+    }
+
     override fun YamlConfiguration.modifyConfig() {
         set(keyPath, sMachine.machineSLocations.toList())
     }

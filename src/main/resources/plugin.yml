@@ -2,4 +2,8 @@ name: SunSTCore
 version: 1.0.0
 main: io.github.sunshinewzy.sunstcore.SunSTCore
 author: Sunshine_wzy
-description: A core lib by SunST.
+description: A core lib by SunShine Technology.
+
+commands:
+  sun:
+    description: SunShine Technology Core

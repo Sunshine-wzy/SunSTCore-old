@@ -11,6 +11,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.event.block.Action
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.NumberConversions
 
 /**
  * 范围型建筑手杖
@@ -56,10 +57,14 @@ class RangeStick(item: ItemStack, val radius: Int) : ConstructionStick(item) {
                         true
                     }
                 }
+                
+                isCancelled = true
                 return@addAction
             }
         }
     }
+
+    constructor(map: Map<String, Any>) : this(deserialize(map), NumberConversions.toInt(map["radius"]))
 
     
     override fun checkFirstRun() {
@@ -84,7 +89,7 @@ class RangeStick(item: ItemStack, val radius: Int) : ConstructionStick(item) {
                         val setLoc = hashSetOf(block.location)
 
                         face.transform().forEach {
-                            judgeCircle(block.location, it, face, radius, setLoc)
+                            judgeCircle(block.location, it, face, stick.radius, setLoc)
                         }
 
                         player.spawnStickSelectParticle(setLoc, face)
@@ -95,11 +100,17 @@ class RangeStick(item: ItemStack, val radius: Int) : ConstructionStick(item) {
             }, period, period)
         }
     }
-    
-    
+
+    override fun serialize(): MutableMap<String, Any> {
+        val map = super.serialize()
+        map["radius"] = radius
+        return map
+    }
+
     companion object {
         private val sticks = ArrayList<RangeStick>()
 
+        
         /**
          * 建筑手杖检测周期(默认: 10tick)
          */

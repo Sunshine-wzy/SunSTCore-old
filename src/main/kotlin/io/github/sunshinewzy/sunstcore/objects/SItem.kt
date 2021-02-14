@@ -90,6 +90,8 @@ open class SItem(item: ItemStack) : ItemStack(item) {
     companion object {
         private val itemActions = HashMap<SItem, ArrayList<PlayerInteractEvent.() -> Unit>>()
         
+        val items = HashMap<String, ItemStack>()
+        
         
         fun createTaskSymbol(type: Material, damage: Short, vararg lore: String = arrayOf()): SItem {
             val loreList = arrayListOf("§a>点我查看任务<")
@@ -105,7 +107,7 @@ open class SItem(item: ItemStack) : ItemStack(item) {
                 if(item == null || item.type == Material.AIR) return@subscribeEvent
                 
                 itemActions.forEach { (sItem, blocks) -> 
-                    if(sItem == item){
+                    if(item.isItemSimilar(sItem)){
                         blocks.forEach { it(this) }
                     }
                 }
@@ -145,7 +147,13 @@ open class SItem(item: ItemStack) : ItemStack(item) {
             return this
         }
 
-        fun ItemStack.isItemSimilar(item: ItemStack, checkLore: Boolean = true, checkAmount: Boolean = true, checkDurability: Boolean = false): Boolean {
+        fun ItemStack.isItemSimilar(
+            item: ItemStack,
+            checkLore: Boolean = true,
+            checkAmount: Boolean = true,
+            checkDurability: Boolean = false,
+            ignoreLastTwoLine: Boolean = false
+        ): Boolean {
             return if (type != item.type) {
                 false
             } else if (checkAmount && amount < item.amount) {
@@ -156,13 +164,18 @@ open class SItem(item: ItemStack) : ItemStack(item) {
                 val itemMeta = itemMeta
 
                 if (item.hasItemMeta())
-                    itemMeta.isMetaEqual(item.itemMeta, checkLore)
+                    itemMeta.isMetaEqual(item.itemMeta, checkLore, ignoreLastTwoLine)
                 else false
             } else !item.hasItemMeta()
         }
         
-        fun ItemStack.isItemSimilar(item: Itemable, checkLore: Boolean = true, checkAmount: Boolean = true, checkDurability: Boolean = false): Boolean =
-            isItemSimilar(item.getSItem(), checkLore, checkAmount, checkDurability)
+        fun ItemStack.isItemSimilar(
+            item: Itemable,
+            checkLore: Boolean = true,
+            checkAmount: Boolean = true,
+            checkDurability: Boolean = false,
+            ignoreLastTwoLine: Boolean = false
+        ): Boolean = isItemSimilar(item.getSItem(), checkLore, checkAmount, checkDurability, ignoreLastTwoLine)
         
         fun ItemStack.addRecipe(plugin: JavaPlugin, recipe: Recipe): ItemStack {
             plugin.server.addRecipe(recipe)
@@ -232,8 +245,48 @@ open class SItem(item: ItemStack) : ItemStack(item) {
             return this
         }
         
+        fun ItemStack.getSMeta(): ItemMeta = if(hasItemMeta()) itemMeta else Bukkit.getItemFactory().getItemMeta(type)
+        
+        fun ItemStack.addUseCount(maxCnt: Int): Boolean {
+            val meta = getSMeta()
+            val lore = meta.lore
+            val last = lore.last()
+            if(last.startsWith("§7||§a=")){
+                var str = last.substringBefore('>')
+                val cnt = last.filter { it == '=' }.length
+                if(cnt >= maxCnt){
+                    lore.removeAt(lore.lastIndex)
+                    lore.removeAt(lore.lastIndex)
+                    amount--
+                    
+                    meta.lore = lore
+                    itemMeta = meta
+                    return true
+                }
+                else{
+                    str += "=> §e"
+                    val num = (100 / maxCnt) * (cnt + 1)
+                    str += "$num%"
+                }
+                
+                lore[lore.lastIndex] = str
+            }
+            else {
+                lore.add("")
+                lore.add("§7||§a=> §e${100 / maxCnt}%")
+            }
+            
+            meta.lore = lore
+            itemMeta = meta
+            return false
+        }
+        
 
-        fun ItemMeta.isMetaEqual(itemMeta: ItemMeta, checkLore: Boolean = true): Boolean {
+        fun ItemMeta.isMetaEqual(
+            itemMeta: ItemMeta,
+            checkLore: Boolean = true,
+            ignoreLastTwoLine: Boolean = false
+        ): Boolean {
             return if (itemMeta.hasDisplayName() != hasDisplayName()) {
                 false
             } else if (itemMeta.hasDisplayName() && hasDisplayName() && itemMeta.displayName != displayName) {
@@ -241,13 +294,24 @@ open class SItem(item: ItemStack) : ItemStack(item) {
             } else if (!checkLore) {
                 true
             } else if (itemMeta.hasLore() && hasLore()) {
-                lore.isLoreEqual(itemMeta.lore)
+                lore.isLoreEqual(itemMeta.lore, ignoreLastTwoLine)
             } else !itemMeta.hasLore() && !hasLore()
         }
 
         
-        fun List<String>.isLoreEqual(lore: List<String>): Boolean {
+        fun List<String>.isLoreEqual(
+            lore: List<String>,
+            ignoreLastTwoLine: Boolean = false
+        ): Boolean {
             if(isEmpty() && lore.isEmpty()) return true
+            
+            if(ignoreLastTwoLine && last().startsWith("§7||")){
+                val loreIgnoreLastTwoLine = ArrayList<String>()
+                for(i in 0..lastIndex-2)
+                    loreIgnoreLastTwoLine.add(this[i])
+                
+                return loreIgnoreLastTwoLine.toString() == lore.toString()
+            }
 
             return toString() == lore.toString()
         }
