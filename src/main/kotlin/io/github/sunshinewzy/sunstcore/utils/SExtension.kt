@@ -7,6 +7,7 @@ import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
+import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.isItemSimilar
 import io.github.sunshinewzy.sunstcore.objects.SMetadataValue
 import io.github.sunshinewzy.sunstcore.objects.orderWith
@@ -18,6 +19,7 @@ import org.bukkit.block.BlockFace.*
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.*
+import org.bukkit.material.Leaves
 import org.bukkit.material.MaterialData
 import org.bukkit.metadata.MetadataValueAdapter
 import org.bukkit.plugin.java.JavaPlugin
@@ -217,11 +219,14 @@ fun Player.damageItemInOffHand(damage: Int = 1) {
 fun Inventory.containsItem(item: ItemStack, amount: Int = 1): Boolean {
     if(amount <= 0) return true
     
-    var cnt = amount
+    val theItem = item.clone()
+    var cnt = theItem.amount * amount
+    theItem.amount = 1
+    
     storageContents.forEach {
         if(it == null) return@forEach
         
-        if (it.isItemSimilar(item)) {
+        if (it.isItemSimilar(theItem)) {
             cnt -= it.amount
             if (cnt <= 0) return true
         }
@@ -243,11 +248,14 @@ fun Inventory.containsItem(items: Array<ItemStack>): Boolean {
 fun Inventory.removeSItem(item: ItemStack, amount: Int = 1): Boolean {
     if(amount <= 0) return true
 
-    var cnt = amount
+    val theItem = item.clone()
+    var cnt = theItem.amount * amount
+    theItem.amount = 1
+    
     storageContents.forEach {
         if(it == null) return@forEach
 
-        if (it.isItemSimilar(item)) {
+        if (it.isItemSimilar(theItem)) {
             val theCnt = cnt
             cnt -= it.amount
 
@@ -266,6 +274,27 @@ fun Inventory.removeSItem(items: Array<ItemStack>): Boolean {
         if(!removeSItem(it)) return false
     }
     return true
+}
+
+fun Inventory.removeSItem(type: Material, amount: Int): Boolean {
+    if(amount <= 0) return true
+    var cnt = amount
+
+    storageContents.forEach {
+        if(it == null) return@forEach
+
+        if (it.type == type) {
+            val theCnt = cnt
+            cnt -= it.amount
+
+            if(it.amount > theCnt) it.amount -= theCnt
+            else it.amount = 0
+
+            if (cnt <= 0) return true
+        }
+    }
+
+    return false
 }
 
 fun Inventory.isFull(): Boolean = firstEmpty() > size
@@ -394,6 +423,17 @@ fun Location.removeClone(y: Int): Location =
 //region Material 材料
 
 fun MaterialData.getDurability(): Short = toItemStack(1).durability
+
+fun Leaves.getSapling(): ItemStack =
+    when(species) {
+        TreeSpecies.GENERIC -> SItem(Material.SAPLING, 0, 1)
+        TreeSpecies.REDWOOD -> SItem(Material.SAPLING, 1, 1)
+        TreeSpecies.BIRCH -> SItem(Material.SAPLING, 2, 1)
+        TreeSpecies.JUNGLE -> SItem(Material.SAPLING, 3, 1)
+        TreeSpecies.ACACIA -> SItem(Material.SAPLING, 4, 1)
+        TreeSpecies.DARK_OAK -> SItem(Material.SAPLING, 5, 1)
+        else -> SItem(Material.SAPLING, 0, 1)
+    }
 
 //endregion
 

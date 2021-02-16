@@ -62,4 +62,14 @@ tasks {
         archiveVersion.set(project.version.toString())
         destinationDirectory.set(file("F:/Java/Debug/Spigot-1.12/plugins"))
     }
+    
+    kotlinSourcesJar {
+        archiveBaseName.set("SunSTCore")
+        archiveVersion.set(project.version.toString())
+        destinationDirectory.set(file("F:/Kotlin/Workspace/SkyDream/cores"))
+        
+//        archiveClassifier.set("sources")
+        from(sourceSets.main.get().allSource)
+    }
+    
 }

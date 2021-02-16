@@ -32,7 +32,7 @@ abstract class TaskBase(
     var openSound = taskStage.openSound
     var volume = taskStage.volume
     var pitch = taskStage.pitch
-    var submitItem = TaskGuideItem.SUBMIT.item.setLore(*descriptionLore)
+    var submitItem = TaskGuideItem.SUBMIT.item.clone().setLore(*descriptionLore)
     
     
     init {

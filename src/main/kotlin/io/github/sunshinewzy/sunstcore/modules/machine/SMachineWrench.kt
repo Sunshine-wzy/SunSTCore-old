@@ -52,7 +52,7 @@ class SMachineWrench(val plugin: JavaPlugin, item: ItemStack) : SItem(item) {
                     if(!sBlock.isSimilar(clickedBlock)) return@machines
                     
                     listMachine.forEach machine@{ sMachine -> 
-                        if(sMachine.judgeStructure(loc)){
+                        if(sMachine.judgeStructure(loc, true)){
                             sMachine.addMachine(loc, player)
                             
                             loc.world.playEffect(loc, Effect.ENDER_SIGNAL, 1)

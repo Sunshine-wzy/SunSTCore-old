@@ -11,7 +11,6 @@ object SReflect : Initable {
     val nms = "net.minecraft.server.$version"
     val obc = "org.bukkit.craftbukkit.$version"
     
-    
     val classItemStack: Class<*> = Class.forName("$nms.ItemStack")
     val classEntityPlayer: Class<*> = Class.forName("$nms.EntityPlayer")
     val classEntityLiving: Class<*> = Class.forName("$nms.EntityLiving")

@@ -14,6 +14,9 @@ import org.bukkit.plugin.java.JavaPlugin
 
 open class SItem(item: ItemStack) : ItemStack(item) {
     
+    constructor(item: ItemStack, amount: Int) : this(item) {
+        this.amount = amount
+    }
     constructor(item: ItemStack, name: String) : this(item) {
         setName(name)
     }
@@ -249,11 +252,13 @@ open class SItem(item: ItemStack) : ItemStack(item) {
         
         fun ItemStack.addUseCount(maxCnt: Int): Boolean {
             val meta = getSMeta()
-            val lore = meta.lore
-            val last = lore.last()
-            if(last.startsWith("§7||§a=")){
+            val lore = meta.lore ?: ArrayList<String>()
+            
+            if(lore.isNotEmpty() && lore.last().startsWith("§7||§a=")){
+                val last = lore.last()
                 var str = last.substringBefore('>')
                 val cnt = last.filter { it == '=' }.length
+                
                 if(cnt >= maxCnt){
                     lore.removeAt(lore.lastIndex)
                     lore.removeAt(lore.lastIndex)

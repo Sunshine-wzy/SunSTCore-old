@@ -32,21 +32,35 @@ abstract class SMachine(
 
         SMachineData(this)
     }
-    
-    
+
+
+    /**
+     * 运行机器
+     */
     abstract fun runMachine(event: SMachineRunEvent)
-    
-    
-    fun judgeStructure(loc: Location): Boolean {
-        if(structure.judge(loc.removeClone(structure.center)))
-            return specialJudge()
+
+
+    /**
+     * 多方块机器结构判定
+     */
+    fun judgeStructure(loc: Location, isFirst: Boolean = false): Boolean {
+        val baseLoc = loc.removeClone(structure.center)
+        if(structure.judge(baseLoc))
+            return specialJudge(baseLoc, isFirst)
         
         return false
     }
-    
-    open fun specialJudge(): Boolean = true
-    
-    
+
+    /**
+     * 多方块机器结构特判
+     * 在通过一般结构判定后调用
+     */
+    open fun specialJudge(loc: Location, isFirst: Boolean): Boolean = true
+
+
+    /**
+     * 添加机器
+     */
     fun addMachine(loc: Location, player: Player) {
         machines[SLocation(loc)] = this
         SunSTCore.pluginManager.callEvent(SMachineAddEvent(this, loc, player))
@@ -55,7 +69,10 @@ abstract class SMachine(
     fun addMachine(sLocation: SLocation) {
         machines[sLocation] = this
     }
-    
+
+    /**
+     * 移除机器
+     */
     fun removeMachine(loc: Location) {
         val sLoc = SLocation(loc)
         
@@ -75,6 +92,9 @@ abstract class SMachine(
         
     }
 
+    /**
+     * 在 [loc] 位置生成该机器的结构 (不会构建机器)
+     */
     @SunSTTestApi
     fun buildMachine(loc: Location) {
         var theLoc: Location
@@ -88,6 +108,9 @@ abstract class SMachine(
     
     
     companion object {
+        /**
+         * 所有机器的位置
+         */
         private val machines = HashMap<SLocation, SMachine>()
 
 

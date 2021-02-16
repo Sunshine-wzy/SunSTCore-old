@@ -87,8 +87,9 @@ class TaskStage(
 
                     inv.setItem(it.order, symbol.setNameAndLore(
                         name,
-                        "§e此任务尚未解锁，无法查看",
-                        "§c您需要解锁此任务的前置任务来解锁此任务"
+                        "§d此任务尚未解锁，无法查看",
+                        "§c您需要解锁此任务的前置任务",
+                        "§f[§e${pre.taskName}§f] §c来解锁此任务"
                     ))
                 }
             }

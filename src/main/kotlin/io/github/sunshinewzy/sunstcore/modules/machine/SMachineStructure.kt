@@ -92,7 +92,8 @@ abstract class SMachineStructure(val size: SMachineSize, val shape: String, val 
             var theLoc: Location
             structure.forEach { (coord, sBlock) -> 
                 theLoc = loc.addClone(coord)
-                if(!sBlock.isSimilar(theLoc))
+                
+                if(sBlock.material != Material.AIR && !sBlock.isSimilar(theLoc))
                     return false
             }
             

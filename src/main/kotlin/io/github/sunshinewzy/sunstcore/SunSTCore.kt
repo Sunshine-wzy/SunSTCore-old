@@ -12,10 +12,13 @@ import io.github.sunshinewzy.sunstcore.objects.item.constructionstick.LineStick
 import io.github.sunshinewzy.sunstcore.objects.item.constructionstick.RangeStick
 import io.github.sunshinewzy.sunstcore.utils.SReflect
 import io.github.sunshinewzy.sunstcore.utils.SunSTTestApi
+import io.github.sunshinewzy.sunstcore.utils.sendMsg
+import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.Bukkit
 import org.bukkit.configuration.serialization.ConfigurationSerialization
+import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -49,6 +52,7 @@ class SunSTCore : JavaPlugin() {
         
         logger.info("SunSTCore 加载成功！")
         
+        test()
     }
 
     override fun onDisable() {
@@ -90,7 +94,9 @@ class SunSTCore : JavaPlugin() {
     
     @SunSTTestApi
     private fun test() {
-        
+        subscribeEvent<BlockDamageEvent> { 
+            player.sendMsg("方块信息", "${block.type}:${block.state.data.toItemStack(1).durability}")
+        }
     }
     
 }
