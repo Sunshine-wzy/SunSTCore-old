@@ -33,6 +33,7 @@ abstract class TaskBase(
     var volume = taskStage.volume
     var pitch = taskStage.pitch
     var submitItem = TaskGuideItem.SUBMIT.item.clone().setLore(*descriptionLore)
+    var isCreateEdge = true
     
     
     init {
@@ -50,6 +51,10 @@ abstract class TaskBase(
                     }
                     
                     backItemOrder -> {
+                        val holder = inventory.holder
+                        if(holder is TaskInventoryHolder && holder.value > 1)
+                            holder.value = 1
+                        
                         taskStage.openTaskInv(player)
                     }
                 }
@@ -81,6 +86,7 @@ abstract class TaskBase(
     
     
     override fun openTaskInv(p: Player, inv: Inventory) {
+        TaskProject.lastTaskProject[p.uniqueId] = taskStage.taskProject
         taskStage.taskProject.lastTaskInv[p.uniqueId] = this
         
         p.playSound(p.location, openSound, volume, pitch)
@@ -89,7 +95,8 @@ abstract class TaskBase(
     
     override fun getTaskInv(p: Player): Inventory {
         val inv = Bukkit.createInventory(holder, invSize * 9, taskName)
-        inv.createEdge(invSize, taskStage.edgeItem)
+        if(isCreateEdge)
+            inv.createEdge(invSize, taskStage.edgeItem)
         
         slotItems.forEach { (slotOrder, item) -> 
             inv.setItem(slotOrder, item)

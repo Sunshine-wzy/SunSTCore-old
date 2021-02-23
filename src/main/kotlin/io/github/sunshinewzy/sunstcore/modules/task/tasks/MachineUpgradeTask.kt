@@ -3,7 +3,7 @@ package io.github.sunshinewzy.sunstcore.modules.task.tasks
 import io.github.sunshinewzy.sunstcore.interfaces.MultiPageable
 import io.github.sunshinewzy.sunstcore.modules.machine.SMachine
 import io.github.sunshinewzy.sunstcore.modules.machine.SMachineSize
-import io.github.sunshinewzy.sunstcore.modules.machine.SMachineWrench.Companion.getLastAddMachine
+import io.github.sunshinewzy.sunstcore.modules.machine.displayInInventory
 import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
 import io.github.sunshinewzy.sunstcore.objects.SItem
@@ -12,7 +12,6 @@ import io.github.sunshinewzy.sunstcore.objects.toX
 import io.github.sunshinewzy.sunstcore.objects.toY
 import io.github.sunshinewzy.sunstcore.utils.containsItem
 import io.github.sunshinewzy.sunstcore.utils.getSPlayer
-import io.github.sunshinewzy.sunstcore.utils.sendMsg
 import io.github.sunshinewzy.sunstcore.utils.setItem
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -21,7 +20,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-class MachineTask(
+class MachineUpgradeTask(
     taskStage: TaskStage,
     taskName: String,
     order: Int,
@@ -29,17 +28,19 @@ class MachineTask(
     symbol: ItemStack,
     reward: Array<ItemStack>,
     val sMachine: SMachine,
+    val level: Int,
     val requireItems: Array<ItemStack>,
     vararg descriptionLore: String
 ) : TaskBase(taskStage, taskName, order, predecessor, symbol, reward, 5, *descriptionLore), MultiPageable {
     private val size = sMachine.structure.size
-    
-    
+    private var flag = true
+
+
     init {
         openSound = Sound.UI_BUTTON_CLICK
         volume = 1f
         pitch = 1f
-        
+
         val yellowGlassPane = SItem(Material.STAINED_GLASS_PANE, 4, 1, " ")
         for(i in 1..5){
             if(i != 3)
@@ -49,37 +50,58 @@ class MachineTask(
             setSlotItem(i, 1, SItem(Material.AIR))
             setSlotItem(i, 5, SItem(Material.AIR))
         }
-        
+
         setSlotItem(2, 1, yellowGlassPane)
         setSlotItem(2, 5, yellowGlassPane)
         setSubmitItemOrder(8, 1)
-        setBackItemOrder(8, 5) 
+        setBackItemOrder(8, 5)
 
-        when(size) {
-            SMachineSize.SIZE3 -> {
-                setSlotItem(9, 1, yellowGlassPane)
-                setSlotItem(9, 5, yellowGlassPane)
+        
+        val upgrade = sMachine.structure.getUpgrade(level) ?: throw IllegalArgumentException(
+            "[MachineUpgradeTask] $taskName: ${sMachine.name} 没有 $level 级"
+        )
+        
+        for(coord in upgrade.keys){
+            if(!size.isCoordInSize(coord)){
+                flag = false
+                break
+            }
+        }
+        
+        if(flag){
+            when(size) {
+                SMachineSize.SIZE3 -> {
+                    setSlotItem(9, 1, yellowGlassPane)
+                    setSlotItem(9, 5, yellowGlassPane)
 
-                for(i in 1..3){
-                    setSlotItem(9, 5 - i, SItem(
-                        Material.STAINED_GLASS_PANE,
-                        5, i,
-                        "§b⇨ §a查看 第§e$i§a层",
-                        "§7Tip:","§f层数自下而上显示"
-                    ))
+                    for(i in 1..3){
+                        setSlotItem(9, 5 - i, SItem(
+                            Material.STAINED_GLASS_PANE,
+                            5, i,
+                            "§b⇨ §a查看 第§e$i§a层",
+                            "§7Tip:","§f层数自下而上显示"
+                        ))
+                    }
+                }
+
+                SMachineSize.SIZE5 -> {
+                    for(i in 1..5){
+                        setSlotItem(9, 6 - i, SItem(
+                            Material.STAINED_GLASS_PANE,
+                            5, i,
+                            "§b⇨ §a查看 第§e$i§a层",
+                            "§7Tip:","§f层数自下而上显示"
+                        ))
+                    }
                 }
             }
+        }
+        else{
+            for(i in 1..5)
+                setSlotItem(9, i, yellowGlassPane)
             
-            SMachineSize.SIZE5 -> {
-                for(i in 1..5){
-                    setSlotItem(9, 6 - i, SItem(
-                        Material.STAINED_GLASS_PANE,
-                        5, i,
-                        "§b⇨ §a查看 第§e$i§a层",
-                        "§7Tip:","§f层数自下而上显示"
-                    ))
-                }
-            }
+            setSlotItem(1, 3, SItem(Material.STRUCTURE_VOID, "§a插件升级"))
+            setSlotItem(9, 3, SItem(Material.STRUCTURE_VOID, "§a插件升级"))
         }
         
     }
@@ -89,11 +111,12 @@ class MachineTask(
         taskStage.taskProject.lastTaskInv[p.uniqueId] = this
 
         p.playSound(p.location, openSound, volume, pitch)
-        if(inv.getItem(1 orderWith 3).type == Material.STAINED_GLASS_PANE){
+        if(flag && inv.getItem(1 orderWith 3).type == Material.STAINED_GLASS_PANE){
             p.openInventory(pageInvIn(p, 1))
             return
         }
 
+        sMachine.structure.getUpgrade(level)?.displayInInventory(inv, 0)
         p.openInventory(inv)
     }
 
@@ -101,34 +124,34 @@ class MachineTask(
         val player = e.view.getSPlayer()
         val x = e.slot.toX(9)
         val y = e.slot.toY(9)
-        
-        if(x == 9){
+
+        if(flag && x == 9){
             when(size) {
                 SMachineSize.SIZE3 -> {
                     if(y in 2..4)
                         openTaskInv(player, pageInvIn(player, 5 - y))
                 }
-                
+
                 SMachineSize.SIZE5 -> {
                     openTaskInv(player, pageInvIn(player, 6 - y))
                 }
             }
-            
+
         }
-        
+
     }
 
     override fun pageInvIn(player: Player, page: Int): Inventory {
         val inv = getTaskInv(player)
         val structure = sMachine.structure
-        
+
         inv.setItem(1, 3, SItem(
             Material.STRUCTURE_VOID,
             page,
             "§a第§e$page§a层",
             "§7Tip:", "§f层数自下而上显示"
         ))
-        
+
         when(structure.size) {
             SMachineSize.SIZE3 -> {
                 inv.setItem(9, 5 - page, SItem(
@@ -136,10 +159,9 @@ class MachineTask(
                     "§b⇦ §a当前所在 第§e$page§a层",
                     "§7Tip:","§f层数自下而上显示"
                 ))
-                
-                structure.displayInInventory(inv, page)
+
             }
-            
+
             SMachineSize.SIZE5 -> {
                 inv.setItem(9, 6 - page, SItem(
                     Material.STRUCTURE_VOID, page,
@@ -147,28 +169,18 @@ class MachineTask(
                     "§7Tip:","§f层数自下而上显示"
                 ))
 
-                structure.displayInInventory(inv, page)
             }
         }
-        
+
+        structure.displayInInventory(inv, page)
+        sMachine.structure.getUpgrade(level)?.displayInInventory(inv, page)
+
         return inv
     }
 
     override fun submit(player: Player) {
-        val inv = player.inventory
-        val lastAddMachine = player.getLastAddMachine()
-        
-        if(lastAddMachine == sMachine.name){
-            if(requireItems.isNotEmpty()){
-                if(inv.containsItem(requireItems))
-                    completeTask(player)
-                else requireNotEnough(player)
-            } else completeTask(player)
-        }
-        else{
-            player.playSound(player.location, Sound.ENTITY_ITEM_BREAK, 1f, 1.2f)
-            player.sendMsg("&c您上一次构建的多方块机器不是 &f[${sMachine.name}&f] &c！" )
-        }
-        
+        if(player.inventory.containsItem(requireItems))
+            completeTask(player)
+        else requireNotEnough(player)
     }
 }

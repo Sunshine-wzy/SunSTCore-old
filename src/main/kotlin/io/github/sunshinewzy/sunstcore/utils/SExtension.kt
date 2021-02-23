@@ -7,10 +7,8 @@ import io.github.sunshinewzy.sunstcore.modules.task.TaskBase
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProgress
 import io.github.sunshinewzy.sunstcore.modules.task.TaskProject
 import io.github.sunshinewzy.sunstcore.modules.task.TaskStage
-import io.github.sunshinewzy.sunstcore.objects.SItem
+import io.github.sunshinewzy.sunstcore.objects.*
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.isItemSimilar
-import io.github.sunshinewzy.sunstcore.objects.SMetadataValue
-import io.github.sunshinewzy.sunstcore.objects.orderWith
 import io.github.sunshinewzy.sunstcore.utils.SReflect.damage
 import org.bukkit.*
 import org.bukkit.block.Block
@@ -24,9 +22,21 @@ import org.bukkit.material.MaterialData
 import org.bukkit.metadata.MetadataValueAdapter
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
+import kotlin.random.Random
 
 
 //region Any 对象
+
+inline fun <reified T> Any.castList(): ArrayList<T> {
+    val list = ArrayList<T>()
+    if(this is List<*>){
+        forEach { 
+            if(it is T)
+                list += it
+        }
+    }
+    return list
+}
 
 /**
  * Object转Map
@@ -209,6 +219,16 @@ fun Player.damageItemInOffHand(damage: Int = 1) {
     inventory.itemInOffHand = inventory.itemInOffHand.damage(damage, this)
 }
 
+fun Player.openInventoryWithSound(
+    inv: Inventory,
+    sound: Sound = Sound.ENTITY_HORSE_ARMOR,
+    volume: Float = 1f,
+    pitch: Float = 1.2f
+) {
+    playSound(location, sound, volume, pitch)
+    openInventory(inv)
+}
+
 //endregion
 
 //region Inventory 物品栏
@@ -299,8 +319,16 @@ fun Inventory.removeSItem(type: Material, amount: Int): Boolean {
 
 fun Inventory.isFull(): Boolean = firstEmpty() > size
 
+fun Inventory.setItem(order: Int, item: Itemable) {
+    setItem(order, item.getSItem())
+}
+
 fun Inventory.setItem(x: Int, y: Int, item: ItemStack) {
     setItem(x orderWith y, item)
+}
+
+fun Inventory.setItem(x: Int, y: Int, item: Itemable) {
+    setItem(x orderWith y, item.getSItem())
 }
 
 /**
@@ -308,7 +336,7 @@ fun Inventory.setItem(x: Int, y: Int, item: ItemStack) {
  */
 fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
     val meta = if (edgeItem.hasItemMeta()) edgeItem.itemMeta else Bukkit.getItemFactory().getItemMeta(edgeItem.type)
-    meta.displayName = "§f"
+    meta.displayName = " "
     edgeItem.itemMeta = meta
 
     for(i in 0..8) {
@@ -319,6 +347,29 @@ fun Inventory.createEdge(invSize: Int, edgeItem: ItemStack) {
         setItem(i, edgeItem)
         setItem(i + 8, edgeItem)
     }
+}
+
+fun Inventory.setCraftSlotItem(craftOrder: Int, item: ItemStack, baseX: Int = 0, baseY: Int = 1) {
+    setItem(baseX + craftOrder.toX(3), baseY + craftOrder.toY(3), item)
+}
+
+fun Inventory.setCraftSlotItem(items: Array<ItemStack>, baseX: Int = 0, baseY: Int = 1) {
+    items.forEachIndexed {
+            i, itemStack ->
+        setCraftSlotItem(i, itemStack, baseX, baseY)
+    }
+}
+
+fun Inventory.setCraftSlotItem(items: List<ItemStack>, baseX: Int = 0, baseY: Int = 1) {
+    items.forEachIndexed {
+            i, itemStack ->
+        setCraftSlotItem(i, itemStack, baseX, baseY)
+    }
+}
+
+fun Inventory.clearCraftSlotItem(baseX: Int = 0, baseY: Int = 1) {
+    for(i in 0..8)
+        setCraftSlotItem(i, ItemStack(Material.AIR), baseX, baseY)
 }
 
 
@@ -400,6 +451,7 @@ fun BlockFace.transform(excludeFace: BlockFace): MutableList<BlockFace> {
 
 fun Location.getFaceLocation(face: BlockFace): Location = clone().add(face.modX.toDouble(), face.modY.toDouble(), face.modZ.toDouble())
 
+
 fun Location.addClone(x: Int, y: Int, z: Int): Location =
     clone().add(x.toDouble(), y.toDouble(), z.toDouble())
 
@@ -417,6 +469,134 @@ fun Location.removeClone(coord: Triple<Int, Int, Int>): Location =
 
 fun Location.removeClone(y: Int): Location =
     removeClone(0, y, 0)
+
+
+fun Location.judgePlaneAround(type: Material, includeCorners: Boolean = false): Boolean {
+    val loc = clone()
+    
+    loc.x = x + 1
+    if(loc.block.type != type) return false
+
+    loc.x = x - 1
+    if(loc.block.type != type) return false
+    loc.x = x
+
+    loc.z = z + 1
+    if(loc.block.type != type) return false
+
+    loc.z = z - 1
+    if(loc.block.type != type) return false
+    loc.z = z
+    
+    if(includeCorners){
+        loc.x = x + 1
+        
+        loc.z = z + 1
+        if(loc.block.type != type) return false
+        
+        loc.z = z - 1
+        if(loc.block.type != type) return false
+        
+        
+        loc.x = x - 1
+
+        loc.z = z + 1
+        if(loc.block.type != type) return false
+
+        loc.z = z - 1
+        if(loc.block.type != type) return false
+
+        loc.x = x
+        loc.z = z
+    }
+    
+    return true
+}
+
+fun Location.judgePlaneAround(types: List<Material>, includeCorners: Boolean = false): Boolean {
+    val loc = clone()
+
+    loc.x = x + 1
+    if(!types.contains(loc.block.type)) return false
+
+    loc.x = x - 1
+    if(!types.contains(loc.block.type)) return false
+    loc.x = x
+
+    loc.z = z + 1
+    if(!types.contains(loc.block.type)) return false
+
+    loc.z = z - 1
+    if(!types.contains(loc.block.type)) return false
+    loc.z = z
+
+    if(includeCorners){
+        loc.x = x + 1
+
+        loc.z = z + 1
+        if(!types.contains(loc.block.type)) return false
+
+        loc.z = z - 1
+        if(!types.contains(loc.block.type)) return false
+
+
+        loc.x = x - 1
+
+        loc.z = z + 1
+        if(!types.contains(loc.block.type)) return false
+
+        loc.z = z - 1
+        if(!types.contains(loc.block.type)) return false
+
+        loc.x = x
+        loc.z = z
+    }
+
+    return true
+}
+
+fun Location.countPlaneAround(type: Material, includeCorners: Boolean = false): Int {
+    val loc = clone()
+    var cnt = 0
+
+    loc.x = x + 1
+    if(loc.block.type == type) cnt++
+
+    loc.x = x - 1
+    if(loc.block.type == type) cnt++
+    loc.x = x
+
+    loc.z = z + 1
+    if(loc.block.type == type) cnt++
+
+    loc.z = z - 1
+    if(loc.block.type == type) cnt++
+    loc.z = z
+
+    if(includeCorners){
+        loc.x = x + 1
+
+        loc.z = z + 1
+        if(loc.block.type == type) cnt++
+
+        loc.z = z - 1
+        if(loc.block.type == type) cnt++
+
+
+        loc.x = x - 1
+
+        loc.z = z + 1
+        if(loc.block.type == type) cnt++
+
+        loc.z = z - 1
+        if(loc.block.type == type) cnt++
+
+        loc.x = x
+        loc.z = z
+    }
+
+    return cnt
+}
 
 //endregion
 
@@ -450,5 +630,15 @@ inline fun <reified F, reified S> MetadataValueAdapter.asPair(default: Pair<F, S
     
     return default
 }
+
+//endregion
+
+//region Random 随机数
+
+fun Random.Default.getInt(st: Int, ed: Int): Int = nextInt(st, ed + 1)
+
+fun Random.Default.getInt(ed: Int): Int = getInt(1, ed)
+
+fun Random.Default.isInPercent(percent: Int): Boolean = getInt(100) in 1..percent
 
 //endregion

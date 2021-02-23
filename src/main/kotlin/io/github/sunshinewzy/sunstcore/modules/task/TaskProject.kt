@@ -49,20 +49,35 @@ class TaskProject(
         subscribeEvent<PlayerInteractEvent> {
             if(item == null) return@subscribeEvent
 
-            if(hand == EquipmentSlot.HAND && (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK)){
-                if(item.isItemSimilar(openItem)){
-                    isCancelled = true
-                    
-                    val uuid = player.uniqueId
-                    if(lastTaskInv.containsKey(uuid)){
-                        val lastInv = lastTaskInv[uuid]
-                        if(lastInv != null){
-                            lastInv.openTaskInv(player)
-                            return@subscribeEvent
+            if(hand == EquipmentSlot.HAND){
+                when(action) {
+                    Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> {
+                        if(player.isSneaking){
+                            openTaskInv(player)
                         }
                     }
                     
-                    openTaskInv(player)
+                    Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK -> {
+                        if(item.isItemSimilar(openItem)){
+                            isCancelled = true
+
+                            val uuid = player.uniqueId
+                            if(lastTaskInv.containsKey(uuid)){
+                                val lastInv = lastTaskInv[uuid]
+                                if(lastInv != null){
+                                    lastInv.openTaskInv(player)
+                                    val holder = player.openInventory.topInventory.holder
+                                    if(holder is TaskInventoryHolder && holder.value > 1)
+                                        holder.value = 1
+                                    return@subscribeEvent
+                                }
+                            }
+
+                            openTaskInv(player)
+                        }
+                    }
+                    
+                    else -> {}
                 }
             }
         }
@@ -81,6 +96,7 @@ class TaskProject(
 
 
     override fun openTaskInv(p: Player, inv: Inventory) {
+        lastTaskProject[p.uniqueId] = this
         lastTaskInv[p.uniqueId] = this
         
         p.playSound(p.location, openSound, volume, pitch)
@@ -123,4 +139,10 @@ class TaskProject(
             return progress
         }
     }
+    
+    
+    companion object {
+        val lastTaskProject = HashMap<UUID, TaskProject>()
+    }
+    
 }

@@ -99,6 +99,8 @@ class SMachineWrench(val plugin: JavaPlugin, item: ItemStack) : SItem(item) {
                             if(machine is MachineManual){
                                 machine.runMachine(SMachineRunEvent.Manual(loc, player))
                             }
+                            
+                            isCancelled = true
                         }
                     }
                 }

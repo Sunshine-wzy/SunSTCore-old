@@ -72,4 +72,7 @@ tasks {
         from(sourceSets.main.get().allSource)
     }
     
+    compileKotlin {
+        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
 }

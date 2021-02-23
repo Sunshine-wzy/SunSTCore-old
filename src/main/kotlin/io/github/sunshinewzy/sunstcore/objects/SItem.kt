@@ -1,6 +1,7 @@
 package io.github.sunshinewzy.sunstcore.objects
 
 import io.github.sunshinewzy.sunstcore.interfaces.Itemable
+import io.github.sunshinewzy.sunstcore.utils.getInt
 import io.github.sunshinewzy.sunstcore.utils.subscribeEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -11,6 +12,7 @@ import org.bukkit.inventory.Recipe
 import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.random.Random
 
 open class SItem(item: ItemStack) : ItemStack(item) {
     
@@ -56,6 +58,9 @@ open class SItem(item: ItemStack) : ItemStack(item) {
     constructor(type: Material, damage: Short, amount: Int, name: String, vararg lore: String) : this(type, damage, amount) {
         setNameAndLore(name, lore.toList())
     }
+    constructor(type: Material, damage: Short, amount: Int, name: String, lore: List<String>) : this(type, damage, amount) {
+        setNameAndLore(name, lore)
+    }
 
 
     /**
@@ -72,7 +77,7 @@ open class SItem(item: ItemStack) : ItemStack(item) {
         actions.add(block)
         return this
     }
-
+    
 
     override fun equals(other: Any?): Boolean =
         when {
@@ -101,7 +106,7 @@ open class SItem(item: ItemStack) : ItemStack(item) {
             if(lore.isNotEmpty())
                 loreList.addAll(lore)
 
-            return SItem(type, damage, 1, "", *lore)
+            return SItem(type, damage, 1, "", loreList)
         }
         
         
@@ -286,6 +291,21 @@ open class SItem(item: ItemStack) : ItemStack(item) {
             return false
         }
         
+        fun ItemStack.randomAmount(st: Int, ed: Int): ItemStack {
+            amount = Random.getInt(st, ed)
+            return this
+        }
+        
+        fun ItemStack.randomAmount(ed: Int): ItemStack = randomAmount(1, ed)
+
+        fun ItemStack.cloneRandomAmount(st: Int, ed: Int): ItemStack {
+            val randItem = clone()
+            randItem.amount = Random.getInt(st, ed)
+            return randItem
+        }
+
+        fun ItemStack.cloneRandomAmount(ed: Int): ItemStack = randomAmount(1, ed)
+        
 
         fun ItemMeta.isMetaEqual(
             itemMeta: ItemMeta,
@@ -320,5 +340,12 @@ open class SItem(item: ItemStack) : ItemStack(item) {
 
             return toString() == lore.toString()
         }
+
+
+        fun ItemStack.addToSunSTItem(keyName: String): ItemStack {
+            items[keyName] = this
+            return this
+        }
+        
     }
 }

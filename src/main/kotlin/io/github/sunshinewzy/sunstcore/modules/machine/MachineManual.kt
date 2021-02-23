@@ -9,7 +9,7 @@ abstract class MachineManual(
     structure: SMachineStructure
 ) : SMachine(name, wrench, structure) {
 
-    override fun runMachine(event: SMachineRunEvent) {
+    final override fun runMachine(event: SMachineRunEvent) {
         if(event is SMachineRunEvent.Manual)
             manualRun(event)
     }

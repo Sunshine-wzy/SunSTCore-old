@@ -20,8 +20,8 @@ abstract class MachineTimer(
         }, period, period)
         
     }
-
-    override fun runMachine(event: SMachineRunEvent) {
+    
+    final override fun runMachine(event: SMachineRunEvent) {
         if(event is SMachineRunEvent.Timer)
             timerRun(event)
     }

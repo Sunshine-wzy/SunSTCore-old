@@ -3,10 +3,12 @@ package io.github.sunshinewzy.sunstcore.modules.machine
 import io.github.sunshinewzy.sunstcore.exceptions.MachineStructureException
 import io.github.sunshinewzy.sunstcore.exceptions.NoIngredientException
 import io.github.sunshinewzy.sunstcore.objects.SBlock
+import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.getSMeta
 import io.github.sunshinewzy.sunstcore.utils.addClone
 import io.github.sunshinewzy.sunstcore.utils.setItem
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.Inventory
 
 /**
@@ -17,7 +19,9 @@ import org.bukkit.inventory.Inventory
  * @param center 机器构造(和使用)的中心坐标, 请确保该坐标对应的方块不为空气
  */
 abstract class SMachineStructure(val size: SMachineSize, val shape: String, val ingredients: Map<Char, SBlock>, val center: Triple<Int, Int, Int>) {
-    val structure = HashMap<Triple<Int, Int, Int>, SBlock>()
+    private val upgrade = ArrayList<CoordSBlockMap>()
+    
+    val structure = CoordSBlockMap()
     val centerBlock: SBlock
     
     
@@ -34,17 +38,19 @@ abstract class SMachineStructure(val size: SMachineSize, val shape: String, val 
                 shape,
                 "The center block cannot be AIR."
             )
+            
             theCenterBlock
         }
         else throw MachineStructureException(
             shape,
             "The center is not a block."
         )
+        
     }
 
     abstract fun specialStructure(x: Int, y: Int, z: Int, sBlock: SBlock)
 
-    abstract fun judge(loc: Location): Boolean
+    abstract fun judge(loc: Location, struct: CoordSBlockMap = structure): Boolean
     
     /**
      * 中心对称
@@ -88,9 +94,9 @@ abstract class SMachineStructure(val size: SMachineSize, val shape: String, val 
             }
         }
 
-        override fun judge(loc: Location): Boolean {
+        override fun judge(loc: Location, struct: CoordSBlockMap): Boolean {
             var theLoc: Location
-            structure.forEach { (coord, sBlock) -> 
+            struct.forEach { (coord, sBlock) -> 
                 theLoc = loc.addClone(coord)
                 
                 if(sBlock.material != Material.AIR && !sBlock.isSimilar(theLoc))
@@ -115,7 +121,7 @@ abstract class SMachineStructure(val size: SMachineSize, val shape: String, val 
             
         }
 
-        override fun judge(loc: Location): Boolean {
+        override fun judge(loc: Location, struct: CoordSBlockMap): Boolean {
             
             return false
         }
@@ -127,19 +133,62 @@ abstract class SMachineStructure(val size: SMachineSize, val shape: String, val 
             val (x, y, z) = coord
             if(y != layer - 1) return@forEach
             
+            val item =
+                if(coord == center){
+                    sBlock.getDisplayItem().clone().apply {
+                        addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1)
+                        val meta = getSMeta()
+                        val list = listOf("", "§a用扳手右键敲我以构建多方块结构~")
+                        if(meta.hasLore()){
+                            meta.lore.addAll(list)
+                        } else meta.lore = list
+                        itemMeta = meta
+                    }
+                }
+                else sBlock.getDisplayItem()
+            
             when(size) {
                 SMachineSize.SIZE3 -> {
                     if(size.isCoordInSize(coord))
-                        inv.setItem(invBaseX + x, invBaseY + z, sBlock.getDisplayItem())
+                        inv.setItem(invBaseX + x, invBaseY + z, item)
                 }
                 
                 SMachineSize.SIZE5 -> {
                     if(size.isCoordInSize(coord))
-                        inv.setItem(invBaseX + x, invBaseY + z, sBlock.getDisplayItem())
+                        inv.setItem(invBaseX + x, invBaseY + z, item)
                 }
             }
         }
     }
+    
+    
+    fun addUpgrade(struct: CoordSBlockMap): SMachineStructure {
+        upgrade += struct
+        return this
+    }
+    
+    fun judgeUpgrade(loc: Location): Int {
+        var level = 0
+        
+        upgrade.forEach { coordMap ->
+            if(judge(loc, coordMap))
+                level++
+            else return level
+        }
+        
+        return level
+    }
+    
+    fun hasUpgrade(level: Int = 1): Boolean {
+        if(upgrade.isEmpty()) return false
+        
+        return upgrade.size >= level
+    }
+    
+    fun getUpgrade(level: Int): CoordSBlockMap? =
+        if(hasUpgrade(level))
+            upgrade[level - 1]
+        else null
     
 
     private fun shapeStructure() {
@@ -172,4 +221,18 @@ abstract class SMachineStructure(val size: SMachineSize, val shape: String, val 
         const val invBaseY = 3
     }
     
+}
+
+typealias CoordSBlockMap = HashMap<Triple<Int, Int, Int>, SBlock>
+
+fun CoordSBlockMap.displayInInventory(inv: Inventory, page: Int, firstLayer: Boolean = true, layer: Int = 0) {
+    val theY = if(firstLayer) keys.first().second else layer - 1
+    if(page != 0 && page != theY + 1) return
+    
+    forEach { (coord, sBlock) -> 
+        val (x, y, z) = coord
+        if(y != theY) return@forEach
+
+        inv.setItem(SMachineStructure.invBaseX + x, SMachineStructure.invBaseY + z, sBlock.getDisplayItem())
+    }
 }

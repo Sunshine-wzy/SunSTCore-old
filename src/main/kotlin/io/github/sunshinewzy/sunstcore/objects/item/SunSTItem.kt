@@ -5,31 +5,38 @@ import io.github.sunshinewzy.sunstcore.interfaces.Initable
 import io.github.sunshinewzy.sunstcore.interfaces.Itemable
 import io.github.sunshinewzy.sunstcore.objects.SItem
 import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.addRecipe
+import io.github.sunshinewzy.sunstcore.objects.SItem.Companion.addToSunSTItem
 import io.github.sunshinewzy.sunstcore.objects.SShapedRecipe
+import io.github.sunshinewzy.sunstcore.utils.sendMsg
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.event.block.Action
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
-enum class SunSTItem(val sName: String, val item: ItemStack) : Itemable {
-    
+enum class SunSTItem(val item: ItemStack) : Itemable {
+    TOOL_BLOCK_INFO(SItem(Material.WOOD_SPADE, "§a方块信息查看器").addAction { 
+        if(hand == EquipmentSlot.HAND && action == Action.RIGHT_CLICK_BLOCK){
+            player.sendMsg("§a方块信息查看器", "${clickedBlock.type}:${clickedBlock.state.data.toItemStack(1).durability}")
+        }
+    })
     
     
     ;
 
     
     init {
-        SItem.items[sName] = item
+        item.addToSunSTItem(toString())
     }
 
     constructor(
-        sName: String,
         item: SItem,
         key: String,
         ingredient: Map<Char, Material>,
         line1: String = "",
         line2: String = "",
         line3: String = ""
-    ) : this(sName, item) {
+    ) : this(item) {
         item.addRecipe(
             SunSTCore.getPlugin(),
             SShapedRecipe(

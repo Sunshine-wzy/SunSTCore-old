@@ -56,6 +56,7 @@ class TaskStage(
     }
 
     override fun openTaskInv(p: Player, inv: Inventory) {
+        TaskProject.lastTaskProject[p.uniqueId] = taskProject
         taskProject.lastTaskInv[p.uniqueId] = this
         
         p.playSound(p.location, openSound, volume, pitch)
