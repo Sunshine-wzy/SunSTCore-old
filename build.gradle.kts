@@ -61,6 +61,15 @@ tasks {
         archiveBaseName.set("SunSTCore")
         archiveVersion.set(project.version.toString())
         destinationDirectory.set(file("F:/Java/Debug/Spigot-1.12/plugins"))
+
+//        dependencies {
+//            include(dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.2"))
+//            
+//            exclude(dependency(kotlinLib("kotlin-stdlib", "1.4.30")))
+//            exclude(dependency(kotlinLib("kotlin-stdlib-common", "1.4.30")))
+//            exclude(dependency(kotlinLib("kotlin-stdlib-jdk7", "1.4.30")))
+//            exclude(dependency(kotlinLib("kotlin-stdlib-jdk8", "1.4.30")))
+//        }
     }
     
     kotlinSourcesJar {
@@ -76,3 +85,5 @@ tasks {
         kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
+
+fun kotlinLib(name: String, version: String): String = "org.jetbrains.kotlin:$name:$version"

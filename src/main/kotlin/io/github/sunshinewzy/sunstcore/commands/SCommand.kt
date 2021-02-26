@@ -1,5 +1,6 @@
 package io.github.sunshinewzy.sunstcore.commands
 
+import io.github.sunshinewzy.sunstcore.SunSTCore
 import io.github.sunshinewzy.sunstcore.interfaces.Initable
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -17,13 +18,6 @@ abstract class SCommand(val name: String) : CommandExecutor, TabCompleter, Inita
     private val commands = HashMap<String, Pair<Collection<String>, SCommandWrapper.() -> Boolean>>()
     
     
-    init {
-        Bukkit.getPluginCommand(name).apply {
-            executor = this@SCommand
-            tabCompleter = this@SCommand
-        }
-    }
-
     override fun onCommand(
         sender: CommandSender,
         cmd: Command,
@@ -88,7 +82,15 @@ abstract class SCommand(val name: String) : CommandExecutor, TabCompleter, Inita
     }
 
     override fun init() {
+        val pluginCommand = Bukkit.getPluginCommand(name) ?: kotlin.run { 
+            SunSTCore.logger.info("指令 /$name 初始化失败！")
+            return
+        }
         
+        pluginCommand.apply {
+            executor = this@SCommand
+            tabCompleter = this@SCommand
+        }
     }
 
     /**

@@ -4,13 +4,12 @@ import org.bukkit.event.Event
 
 object SEventSubscriber {
     
-    private val subscribers = HashMap<String, ArrayList<(Event) -> Unit>>()
+    private val subscribers = HashMap<String, ArrayList<SEventSubscriberBuilder<out Event>>>()
     
     
-    @Suppress("UNCHECKED_CAST")
-    fun <E: Event> subscribeEvent(eventClass: Class<out E>, block: (event: E) -> Unit) {
+    fun <E: Event> subscribeEvent(eventClass: Class<out E>, block: E.() -> Unit) {
         val name = eventClass.name
-        val eventBlock = block as (Event) -> Unit
+        val eventBlock = SEventSubscriberBuilder(block)
         val list = subscribers[name]
         if(list == null){
             subscribers[name] = arrayListOf(eventBlock)
@@ -21,12 +20,17 @@ object SEventSubscriber {
     fun <E: Event> callSubscribeEvent(event: E) {
         val list = subscribers[event.javaClass.name]
         list?.forEach { 
-            val block = it as (E) -> Unit
+            @Suppress("UNCHECKED_CAST")
+            val block = it.block as E.() -> Unit
             block(event)
         }
     }
     
 }
+
+class SEventSubscriberBuilder<E: Event> internal constructor(
+    val block: E.() -> Unit
+)
 
 
 inline fun <reified E: Event> subscribeEvent(noinline block: E.() -> Unit) = subscribeEvent(E::class.java, block)
